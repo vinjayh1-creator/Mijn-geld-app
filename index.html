@@ -24,6 +24,52 @@ main{margin-left:245px;width:calc(100% - 245px);padding:28px;max-width:1500px}.m
 @media(max-width:950px){.cards{grid-template-columns:repeat(2,1fr)}.section-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){aside{display:none}.app{display:block}main{margin:0;width:100%;padding:16px 14px 88px}.mobile-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.mobile-head .brand{padding:0;font-size:18px}.topbar{display:block}.topbar h1{font-size:23px}.month-nav{margin-top:12px}.cards{grid-template-columns:1fr 1fr;gap:10px}.card{padding:14px;border-radius:13px}.stat-value{font-size:19px}.table{min-width:650px}.bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:20;padding:7px 4px}.bottom-nav button{border:0;background:transparent;color:var(--muted);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px}.bottom-nav button.active{color:var(--primary)}.form-grid{grid-template-columns:1fr}.site-controls{align-items:flex-start;flex-direction:column}}
 @media(min-width:701px){.bottom-nav{display:none}}
+
+/* Fintech visual refresh */
+:root{--primary:#2563eb;--soft:#eff6ff;--shadow:0 10px 32px rgba(15,23,42,.06)}
+[data-theme=dark]{--primary:#60a5fa;--soft:#172554;--shadow:0 10px 32px rgba(0,0,0,.28)}
+body{letter-spacing:-.01em}
+aside{padding:24px 16px;border-right-color:var(--border);box-shadow:4px 0 24px rgba(15,23,42,.025)}
+.brand{letter-spacing:-.02em}
+nav button{border-radius:12px;padding:12px 13px;margin:4px 0;transition:background .15s,transform .15s,color .15s}
+nav button:hover{transform:translateX(2px)}
+main{padding:32px;max-width:1540px}
+.topbar{margin-bottom:26px}
+h1{letter-spacing:-.035em}
+.cards{gap:16px}
+.card{border-radius:18px;padding:21px;border-color:var(--border);box-shadow:var(--shadow)}
+.stat-value{font-size:24px;font-weight:450;letter-spacing:-.025em}
+.stat-label{font-weight:500}
+.section-grid{gap:16px;margin-top:16px}
+.transactions{margin-top:16px}
+.account{padding:14px;border-radius:14px;background:color-mix(in srgb,var(--card) 96%,var(--soft));}
+.account-icon{width:40px;height:40px;border-radius:12px}
+.amount{font-weight:450;justify-content:flex-end;text-align:right;min-width:105px}
+.positive{font-weight:500}.negative{font-weight:500}
+.quick-grid{gap:12px}
+.quick-btn{border-radius:14px;padding:15px;border-color:var(--border);transition:transform .15s,box-shadow .15s,border-color .15s}
+.quick-btn:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(15,23,42,.06);border-color:var(--primary)}
+.btn,.icon-btn,.theme-btn{border-radius:12px}
+.field input,.field select{border-radius:12px}
+.table th,.table td{padding:14px 10px}
+.table th:last-child,.table td:last-child{text-align:right}
+.table td:nth-child(3),.table td:nth-child(4){text-align:right}
+.badge{border-radius:999px;padding:5px 9px}
+.bottom-nav{box-shadow:0 -8px 24px rgba(15,23,42,.06);backdrop-filter:blur(12px);background:color-mix(in srgb,var(--card) 92%,transparent)}
+@media(max-width:700px){main{padding:18px 14px 94px}.card{padding:16px;border-radius:16px}.stat-value{font-size:20px}.cards{gap:11px}.quick-grid{gap:9px}.quick-btn{padding:13px 12px}.bottom-nav{padding:8px 5px}.bottom-nav button{padding:5px 3px}.mobile-head{margin-bottom:18px}}
+
+/* Quick expense tiles */
+.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.quick-btn{min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;padding:16px 12px;border:1px solid var(--border);background:var(--card);border-radius:16px;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease,background .15s ease}
+.quick-btn svg{width:25px;height:25px;color:var(--primary);stroke-width:1.9;margin-bottom:4px}
+.quick-btn strong{display:block;margin-top:0;font-size:14px;font-weight:600}
+.quick-btn .small{font-size:11px;line-height:1.3;color:var(--muted)}
+.quick-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(15,23,42,.08);border-color:color-mix(in srgb,var(--primary) 45%,var(--border));background:var(--soft)}
+.quick-btn:active{transform:translateY(0);box-shadow:none}
+@media(max-width:950px){.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.quick-btn{min-height:102px;padding:12px 7px;border-radius:15px}.quick-btn svg{width:22px;height:22px}.quick-btn strong{font-size:12px}.quick-btn .small{font-size:10px}}
+.dealplug-dashboard-card .section-title svg{width:18px;height:18px;color:var(--primary)}
+.dealplug-dashboard-card .stat-value{font-size:23px}
 </style>
 </head>
 <body>
@@ -34,17 +80,25 @@ main{margin-left:245px;width:calc(100% - 245px);padding:28px;max-width:1500px}.m
 <button data-view="dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</button>
 <button data-view="transactions"><i data-lucide="arrow-left-right"></i>Transacties</button>
 <button data-view="accounts"><i data-lucide="landmark"></i>Rekeningen</button>
-<button data-view="crypto"><i data-lucide="bitcoin"></i>Crypto</button>
+<button data-view="crypto"><i data-lucide="bitcoin"></i>Crypto/Pokemon</button>
 
 <button data-view="dealplug"><i data-lucide="shopping-bag"></i>DealPlugNL</button>
 <button data-view="recurring"><i data-lucide="repeat"></i>Terugkerend</button>
 </nav>
-<div class="bottom-tools"><button class="theme-btn" id="themeBtn"><i data-lucide="moon"></i><span>Licht/donker</span></button></div>
+<div class="bottom-tools">
+  <div style="display:grid;gap:8px;margin-bottom:10px">
+    <button class="theme-btn" id="backupDownload"><i data-lucide="download"></i><span>Backup downloaden</span></button>
+    <button class="theme-btn" id="backupRestore"><i data-lucide="upload"></i><span>Backup herstellen</span></button>
+    <input type="file" id="backupFile" accept=".json,application/json" style="display:none">
+  </div>
+  <button class="theme-btn" id="themeBtn"><i data-lucide="moon"></i><span>Licht/donker</span></button>
+</div>
 </aside>
 <main>
 <div class="mobile-head"><div class="brand"><i data-lucide="wallet"></i>Budget Planner</div><button class="icon-btn" id="mobileTheme"><i data-lucide="moon"></i></button></div>
 <div class="site-controls">
 <div class="small">Alles wordt automatisch lokaal in deze browser opgeslagen.</div>
+
 
 </div>
 <section id="dashboard" class="view"></section>
@@ -60,7 +114,7 @@ main{margin-left:245px;width:calc(100% - 245px);padding:28px;max-width:1500px}.m
 <button data-view="dashboard"><i data-lucide="layout-dashboard"></i>Home</button>
 <button data-view="transactions"><i data-lucide="arrow-left-right"></i>Transacties</button>
 <button data-view="accounts"><i data-lucide="landmark"></i>Rekeningen</button>
-<button data-view="crypto"><i data-lucide="bitcoin"></i>Crypto</button>
+<button data-view="crypto"><i data-lucide="bitcoin"></i>Crypto/Pokemon</button>
 <button data-view="dealplug"><i data-lucide="shopping-bag"></i>DealPlugNL</button>
 </div>
 
@@ -103,6 +157,7 @@ d.budgets=Array.isArray(d.budgets)?d.budgets:[];
 d.goals=Array.isArray(d.goals)?d.goals:[];
 d.recurring=Array.isArray(d.recurring)?d.recurring:[];
 d.cryptoEntries=Array.isArray(d.cryptoEntries)?d.cryptoEntries:[];
+  d.cryptoEntries.forEach(e=>{if(!e.assetType)e.assetType="crypto"});
 d.dealplug=d.dealplug&&typeof d.dealplug==="object"?d.dealplug:{opening:0,entries:[]};
 d.dealplug.opening=Number(d.dealplug.opening)||0;
 d.dealplug.entries=Array.isArray(d.dealplug.entries)?d.dealplug.entries:[];
@@ -200,13 +255,23 @@ $("dashboard").innerHTML=`
 <div class="card"><div class="stat-label"><i data-lucide="arrow-up-right"></i>Deze maand eruit</div><div class="stat-value negative">${euro(expenses)}</div></div>
 <div class="card"><div class="stat-label"><i data-lucide="${net>=0?"trending-up":"trending-down"}"></i>Deze maand saldo</div><div class="stat-value ${net>=0?"positive":"negative"}">${euro(net)}</div></div>
 </div>
-<div class="section-grid">
-<div class="card"><div class="section-title">Geld binnen</div><div class="stat-value positive">${euro(income)}</div><div class="small" style="margin-top:8px">Inkomsten deze maand</div></div>
-<div class="card"><div class="section-title">Geld eruit</div><div class="stat-value negative">${euro(expenses)}</div><div class="small" style="margin-top:8px">Uitgaven deze maand</div></div>
 </div>
 <div class="section-grid">
 <div class="card"><div class="section-title">Spaarrekeningen</div><div class="account-list">${data.accounts.map(a=>`<div class="account"><div class="account-left"><div class="account-icon"><i data-lucide="${a.icon}"></i></div><div>${esc(a.name)}</div></div><div class="amount">${euro(a.balance)}</div></div>`).join("")}</div></div>
-<div class="card"><div class="section-title">DealPlugNL</div><div class="small">Beginstand + verkopen - kosten</div><div class="stat-value ${dpBalance>=0?"positive":"negative"}" style="margin-top:8px">${euro(dpBalance)}</div><div class="small" style="margin-top:6px">Huidige stand</div></div>
+<div class="card dealplug-dashboard-card">
+<div class="section-title"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="shopping-bag"></i>DealPlugNL</span><span class="badge">Business</span></div>
+<div class="small">Overzicht van verkopen en kosten</div>
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:12px">
+<div><div class="small">Huidige stand</div><div class="stat-value ${dpBalance>=0?"positive":"negative"}" style="margin-top:3px">${euro(dpBalance)}</div></div>
+<div style="text-align:right"><div class="small">Resultaat</div><div class="${(dpIncome-dpCosts)>=0?"positive":"negative"}" style="font-size:16px;font-weight:650;margin-top:3px">${(dpIncome-dpCosts)>=0?"+":""}${euro(dpIncome-dpCosts)}</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+<div style="padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--soft)"><div class="small">Verkopen</div><div class="positive" style="font-weight:600;margin-top:3px">${euro(dpIncome)}</div></div>
+<div style="padding:10px;border:1px solid var(--border);border-radius:12px"><div class="small">Kosten</div><div class="negative" style="font-weight:600;margin-top:3px">${euro(dpCosts)}</div></div>
+</div>
+<div style="margin-top:13px;height:6px;background:var(--border);border-radius:99px;overflow:hidden"><div style="height:100%;width="${dpIncome>0?Math.min(100,Math.max(0,(dpIncome-dpCosts)/dpIncome*100)):0}%;background:var(--primary);border-radius:99px"></div></div>
+<div class="small" style="margin-top:6px">Netto na kosten</div>
+</div>
 </div>
 <div class="card transactions"><div class="section-title">Snelle uitgave</div>
 <div class="quick-grid">
@@ -392,28 +457,231 @@ a.balance=n;saveAndRender();
 }
 
 function renderCrypto(){
-const entries=[...data.cryptoEntries].sort((a,b)=>new Date(b.date)-new Date(a.date));
-const invested=entries.filter(e=>e.type==="in").reduce((s,e)=>s+Number(e.amount),0);
-const cashouts=entries.filter(e=>e.type==="out").reduce((s,e)=>s+Number(e.amount),0);
-const result=cashouts-invested;
-const openPosition=Math.max(0,invested-cashouts);
-data.crypto=invested;
-$("crypto").innerHTML=`
-<div class="topbar"><div><h1>Crypto</h1><div class="subtitle">Inleg, uitcashen en gerealiseerd resultaat</div></div></div>
-<div class="cards">
-<div class="card"><div class="stat-label"><i data-lucide="arrow-down-left"></i>Totale inleg</div><div class="stat-value">${euro(invested)}</div></div>
-<div class="card"><div class="stat-label"><i data-lucide="arrow-up-right"></i>Uitgecasht</div><div class="stat-value">${euro(cashouts)}</div></div>
-<div class="card"><div class="stat-label"><i data-lucide="${result>=0?"trending-up":"trending-down"}"></i>Gerealiseerd resultaat</div><div class="stat-value ${result>=0?"positive":"negative"}">${result>=0?"+":""}${euro(result)}</div></div>
-<div class="card"><div class="stat-label"><i data-lucide="coins"></i>Nog in crypto</div><div class="stat-value">${euro(openPosition)}</div><div class="small" style="margin-top:6px">Op basis van inleg minus uitcashen</div></div>
-</div>
-<div class="card"><div class="section-title">Crypto toevoegen</div>
-<div class="form-grid"><div class="field"><label>Nieuwe inleg (€)</label><input id="cryptoIn" type="number" min="0.01" step=".01" inputmode="decimal"></div><div class="field"><label>Uitcashen (€)</label><input id="cryptoOut" type="number" min="0.01" step=".01" inputmode="decimal"></div></div>
-<div class="form-actions"><button class="btn primary" id="addCryptoIn"><i data-lucide="plus"></i>Inleg toevoegen</button><button class="btn" id="addCryptoOut"><i data-lucide="arrow-up-right"></i>Uitcashen</button></div>
-<div class="notice" style="margin-top:14px">Crypto staat los van je spaarrekeningen. Het wordt niet meegerekend als beschikbaar bankgeld.</div></div>
-<div class="card transactions"><div class="section-title">Crypto transacties</div>
-${entries.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Omschrijving</th><th>Datum</th><th>Bedrag</th></tr></thead><tbody>${entries.map(e=>`<tr><td>${esc(e.description||"Crypto")}</td><td>${new Date(e.date).toLocaleDateString("nl-NL")}</td><td class="${e.type==="in"?"negative":"positive"}">${e.type==="in"?"-":"+"}${euro(e.amount)}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">Nog geen crypto-transacties.</div>`}</div>`;
-$("addCryptoIn").onclick=()=>{const n=Number($("cryptoIn").value);if(!Number.isFinite(n)||n<=0){notify("Vul een geldig bedrag in.");return}addCryptoContribution(n)};
-$("addCryptoOut").onclick=()=>{const n=Number($("cryptoOut").value);if(!Number.isFinite(n)||n<=0){notify("Vul een geldig bedrag in.");return}data.cryptoEntries.push({id:uid(),type:"out",amount:n,date:today(),description:"Crypto uitcash"});saveAndRender()};
+  const entries=[...data.cryptoEntries].sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  const cryptoEntries=entries.filter(e=>(e.assetType||"crypto")==="crypto");
+  const pokemonEntries=entries.filter(e=>(e.assetType||"crypto")==="pokemon");
+
+  const cryptoInvested=cryptoEntries.filter(e=>e.type==="in").reduce((s,e)=>s+Number(e.amount),0);
+  const cryptoCashouts=cryptoEntries.filter(e=>e.type==="out").reduce((s,e)=>s+Number(e.amount),0);
+  const cryptoResult=cryptoCashouts-cryptoInvested;
+  const cryptoOpen=Math.max(0,cryptoInvested-cryptoCashouts);
+
+  const pokemonInvested=pokemonEntries.filter(e=>e.type==="in").reduce((s,e)=>s+Number(e.amount),0);
+  const pokemonCashouts=pokemonEntries.filter(e=>e.type==="out").reduce((s,e)=>s+Number(e.amount),0);
+  const pokemonResult=pokemonCashouts-pokemonInvested;
+  const pokemonOpen=Math.max(0,pokemonInvested-pokemonCashouts);
+
+  data.crypto=cryptoInvested;
+
+  $("crypto").innerHTML=`
+  <div class="topbar">
+    <div>
+      <h1>Crypto/Pokemon</h1>
+      <div class="subtitle">Inleg, uitcashen en overzicht van je crypto en Pokémon investeringen</div>
+    </div>
+  </div>
+
+  <div class="toggle" style="max-width:420px">
+    <button type="button" id="assetCryptoTab" class="active">Crypto</button>
+    <button type="button" id="assetPokemonTab">Pokemon</button>
+  </div>
+
+  <div id="cryptoPanel">
+    <div class="cards">
+      <div class="card">
+        <div class="stat-label"><i data-lucide="arrow-down-left"></i>Totale inleg</div>
+        <div class="stat-value">${euro(cryptoInvested)}</div>
+      </div>
+      <div class="card">
+        <div class="stat-label"><i data-lucide="arrow-up-right"></i>Uitgecasht</div>
+        <div class="stat-value">${euro(cryptoCashouts)}</div>
+      </div>
+      <div class="card">
+        <div class="stat-label"><i data-lucide="${cryptoResult>=0?"trending-up":"trending-down"}"></i>Gerealiseerd resultaat</div>
+        <div class="stat-value ${cryptoResult>=0?"positive":"negative"}">${cryptoResult>=0?"+":""}${euro(cryptoResult)}</div>
+      </div>
+      <div class="card">
+        <div class="stat-label"><i data-lucide="coins"></i>Nog in crypto</div>
+        <div class="stat-value">${euro(cryptoOpen)}</div>
+      </div>
+    </div>
+
+    <div class="card transactions">
+      <div class="section-title">Crypto inleg</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nieuwe inleg (€)</label>
+          <input id="cryptoIn" type="number" min="0.01" step=".01" inputmode="decimal" placeholder="Bijv. 500">
+        </div>
+        <div class="field">
+          <label>Omschrijving</label>
+          <input id="cryptoInDesc" type="text" placeholder="Bijv. Bitcoin">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" id="addCryptoIn"><i data-lucide="plus"></i>Inleg toevoegen</button>
+      </div>
+    </div>
+
+    <div class="card transactions">
+      <div class="section-title">Crypto uitcashen</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Uitcashen (€)</label>
+          <input id="cryptoOut" type="number" min="0.01" step=".01" inputmode="decimal" placeholder="Bijv. 750">
+        </div>
+        <div class="field">
+          <label>Omschrijving</label>
+          <input id="cryptoOutDesc" type="text" placeholder="Bijv. Bitcoin verkoop">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn" id="addCryptoOut"><i data-lucide="arrow-up-right"></i>Uitcashen</button>
+      </div>
+    </div>
+
+    <div class="card transactions">
+      <div class="section-title">Crypto transacties</div>
+      ${cryptoEntries.length?`
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>Omschrijving</th><th>Datum</th><th>Type</th><th>Bedrag</th></tr></thead>
+        <tbody>${cryptoEntries.map(e=>`
+          <tr>
+            <td>${esc(e.description||"Crypto")}</td>
+            <td>${new Date(e.date).toLocaleDateString("nl-NL")}</td>
+            <td>${e.type==="in"?"Inleg":"Uitcashen"}</td>
+            <td class="${e.type==="in"?"negative":"positive"}">${e.type==="in"?"-":"+"}${euro(e.amount)}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table></div>`:`<div class="empty">Nog geen crypto-transacties.</div>`}
+    </div>
+  </div>
+
+  <div id="pokemonPanel" style="display:none">
+    <div class="cards">
+      <div class="card">
+        <div class="stat-label"><i data-lucide="arrow-down-left"></i>Totale inleg</div>
+        <div class="stat-value">${euro(pokemonInvested)}</div>
+      </div>
+      <div class="card">
+        <div class="stat-label"><i data-lucide="arrow-up-right"></i>Verkocht / uitgecasht</div>
+        <div class="stat-value">${euro(pokemonCashouts)}</div>
+      </div>
+      <div class="card">
+        <div class="stat-label"><i data-lucide="${pokemonResult>=0?"trending-up":"trending-down"}"></i>Gerealiseerd resultaat</div>
+        <div class="stat-value ${pokemonResult>=0?"positive":"negative"}">${pokemonResult>=0?"+":""}${euro(pokemonResult)}</div>
+      </div>
+      <div class="card">
+        <div class="stat-label"><i data-lucide="layers"></i>Nog in Pokémon</div>
+        <div class="stat-value">${euro(pokemonOpen)}</div>
+      </div>
+    </div>
+
+    <div class="card transactions">
+      <div class="section-title">Pokémon inleg</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nieuwe inleg (€)</label>
+          <input id="pokemonIn" type="number" min="0.01" step=".01" inputmode="decimal" placeholder="Bijv. 250">
+        </div>
+        <div class="field">
+          <label>Omschrijving</label>
+          <input id="pokemonInDesc" type="text" placeholder="Bijv. PSA 10 Pikachu">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" id="addPokemonIn"><i data-lucide="plus"></i>Inleg toevoegen</button>
+      </div>
+    </div>
+
+    <div class="card transactions">
+      <div class="section-title">Pokémon verkopen</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Verkoopbedrag (€)</label>
+          <input id="pokemonOut" type="number" min="0.01" step=".01" inputmode="decimal" placeholder="Bijv. 600">
+        </div>
+        <div class="field">
+          <label>Omschrijving</label>
+          <input id="pokemonOutDesc" type="text" placeholder="Bijv. PSA 10 Pikachu verkocht">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn" id="addPokemonOut"><i data-lucide="arrow-up-right"></i>Verkoop toevoegen</button>
+      </div>
+    </div>
+
+    <div class="card transactions">
+      <div class="section-title">Pokémon transacties</div>
+      ${pokemonEntries.length?`
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>Omschrijving</th><th>Datum</th><th>Type</th><th>Bedrag</th></tr></thead>
+        <tbody>${pokemonEntries.map(e=>`
+          <tr>
+            <td>${esc(e.description||"Pokémon")}</td>
+            <td>${new Date(e.date).toLocaleDateString("nl-NL")}</td>
+            <td>${e.type==="in"?"Inleg":"Verkoop"}</td>
+            <td class="${e.type==="in"?"negative":"positive"}">${e.type==="in"?"-":"+"}${euro(e.amount)}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table></div>`:`<div class="empty">Nog geen Pokémon-transacties.</div>`}
+    </div>
+  </div>`;
+
+  $("assetCryptoTab").onclick=()=>{
+    $("cryptoPanel").style.display="block";
+    $("pokemonPanel").style.display="none";
+    $("assetCryptoTab").classList.add("active");
+    $("assetPokemonTab").classList.remove("active");
+  };
+
+  $("assetPokemonTab").onclick=()=>{
+    $("cryptoPanel").style.display="none";
+    $("pokemonPanel").style.display="block";
+    $("assetCryptoTab").classList.remove("active");
+    $("assetPokemonTab").classList.add("active");
+  };
+
+  $("addCryptoIn").onclick=()=>{
+    const n=Number($("cryptoIn").value);
+    if(!Number.isFinite(n)||n<=0){notify("Vul een geldig bedrag in.");return}
+    data.cryptoEntries.push({
+      id:uid(),type:"in",assetType:"crypto",amount:n,date:today(),
+      description:$("cryptoInDesc").value.trim()||"Crypto inleg"
+    });
+    saveAndRender();
+  };
+
+  $("addCryptoOut").onclick=()=>{
+    const n=Number($("cryptoOut").value);
+    if(!Number.isFinite(n)||n<=0){notify("Vul een geldig bedrag in.");return}
+    data.cryptoEntries.push({
+      id:uid(),type:"out",assetType:"crypto",amount:n,date:today(),
+      description:$("cryptoOutDesc").value.trim()||"Crypto uitcash"
+    });
+    saveAndRender();
+  };
+
+  $("addPokemonIn").onclick=()=>{
+    const n=Number($("pokemonIn").value);
+    if(!Number.isFinite(n)||n<=0){notify("Vul een geldig bedrag in.");return}
+    data.cryptoEntries.push({
+      id:uid(),type:"in",assetType:"pokemon",amount:n,date:today(),
+      description:$("pokemonInDesc").value.trim()||"Pokémon inleg"
+    });
+    saveAndRender();
+  };
+
+  $("addPokemonOut").onclick=()=>{
+    const n=Number($("pokemonOut").value);
+    if(!Number.isFinite(n)||n<=0){notify("Vul een geldig bedrag in.");return}
+    data.cryptoEntries.push({
+      id:uid(),type:"out",assetType:"pokemon",amount:n,date:today(),
+      description:$("pokemonOutDesc").value.trim()||"Pokémon verkoop"
+    });
+    saveAndRender();
+  };
 }
 
 function renderBudgets(){
@@ -508,11 +776,52 @@ function processWeeklySalary(){
   save();
 }
 
+function downloadBackup(){
+try{
+const backup={app:"Budget Planner",version:2,createdAt:new Date().toISOString(),data:data};
+const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+const url=URL.createObjectURL(blob);
+const a=document.createElement("a");
+a.href=url;
+a.download=`BudgetPlanner-backup-${new Date().toISOString().slice(0,10)}.json`;
+document.body.appendChild(a);
+a.click();
+a.remove();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+}catch(e){notify("De backup kon niet worden gemaakt.");}
+}
+
+function restoreBackup(file){
+if(!file)return;
+const reader=new FileReader();
+reader.onload=()=>{
+try{
+const parsed=JSON.parse(reader.result);
+const restored=parsed?.data||parsed;
+if(!restored||typeof restored!=="object"||!Array.isArray(restored.accounts)||!Array.isArray(restored.transactions))throw new Error();
+if(!confirm("Deze backup terugzetten? De huidige gegevens in deze browser worden vervangen."))return;
+localStorage.setItem(STORAGE_KEY,JSON.stringify(restored));
+data=loadData();
+render();
+notify("Backup succesvol hersteld.");
+}catch(e){notify("Dit bestand is geen geldige Budget Planner-backup.");}
+};
+reader.onerror=()=>notify("Het backupbestand kon niet worden gelezen.");
+reader.readAsText(file);
+}
+
+function setupBackupControls(){
+$("backupDownload").onclick=downloadBackup;
+$("backupRestore").onclick=()=>$("backupFile").click();
+$("backupFile").onchange=e=>{restoreBackup(e.target.files?.[0]);e.target.value="";};
+}
+
 function init(){
 processRecurringTransactions();
 processWeeklySalary();
 navEvents();
 setupGlobalControls();
+setupBackupControls();
 render();
 }
 init();
