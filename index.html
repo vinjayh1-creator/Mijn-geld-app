@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Budget Planner</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--border:#e5e7eb;--primary:#4f46e5;--soft:#eef2ff;--green:#059669;--red:#dc2626;--yellow:#d97706;--shadow:0 8px 30px rgba(15,23,42,.07)}
+[data-theme=dark]{--bg:#0b1120;--card:#111827;--text:#f3f4f6;--muted:#9ca3af;--border:#243044;--primary:#818cf8;--soft:#1e1b4b;--green:#34d399;--red:#f87171;--yellow:#fbbf24;--shadow:0 8px 30px rgba(0,0,0,.25)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}
+.app{display:flex;min-height:100vh}aside{width:245px;background:var(--card);border-right:1px solid var(--border);padding:22px 14px;position:fixed;inset:0 auto 0 0;z-index:10}.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;padding:6px 10px 24px}.brand svg{color:var(--primary)}
+nav button{width:100%;display:flex;align-items:center;gap:12px;padding:12px;border:0;background:transparent;color:var(--muted);border-radius:10px;text-align:left;margin:3px 0}nav button:hover,nav button.active{background:var(--soft);color:var(--primary);font-weight:650}
+.bottom-tools{position:absolute;bottom:20px;left:14px;right:14px}.theme-btn{width:100%;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:10px;padding:10px;display:flex;gap:10px;align-items:center}
+main{margin-left:245px;width:calc(100% - 245px);padding:28px;max-width:1500px}.mobile-head{display:none}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:15px}h1{font-size:28px;margin:0 0 5px}.subtitle{color:var(--muted);font-size:14px}.month-nav{display:flex;align-items:center;gap:8px}
+.icon-btn,.btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:10px;padding:9px 11px;display:inline-flex;align-items:center;gap:8px}.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn.danger{color:var(--red)}.icon-btn:hover,.btn:hover{filter:brightness(.97)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:19px;box-shadow:var(--shadow)}.stat-label{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:8px}.stat-value{font-size:25px;font-weight:500;margin-top:9px}.positive{color:var(--green)}.negative{color:var(--red)}
+.section-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:15px;margin-top:15px}.section-title{font-size:16px;font-weight:750;margin:0 0 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}.account-list{display:grid;gap:10px}.account{display:flex;align-items:center;justify-content:space-between;padding:12px;border:1px solid var(--border);border-radius:12px;gap:10px}.account-left{display:flex;align-items:center;gap:12px;min-width:0}.account-icon{width:38px;height:38px;border-radius:10px;background:var(--soft);color:var(--primary);display:grid;place-items:center;flex:none}.small{font-size:12px;color:var(--muted)}.amount{font-weight:500;display:flex;align-items:flex-end;gap:10px;padding:10px 3px 0}.bar-wrap{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px}.bar{width:100%;max-width:42px;border-radius:7px 7px 2px 2px;background:var(--primary);min-height:4px}.bar.out{background:var(--red)}.bar-label{font-size:10px;color:var(--muted)}
+.transactions{margin-top:15px}.table-wrap{overflow-x:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:13px 8px;border-bottom:1px solid var(--border);text-align:left;font-size:13px}.table th{color:var(--muted);font-weight:600}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--soft);color:var(--primary);font-size:11px}.actions{display:flex;gap:5px}.actions button{border:0;background:transparent;color:var(--muted);padding:5px}
+.view{display:none}.view.active{display:block}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.field input,.field select{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);outline:none}.field input:focus,.field select:focus{border-color:var(--primary)}.form-actions{margin-top:15px;display:flex;gap:8px;flex-wrap:wrap}.empty{text-align:center;color:var(--muted);padding:28px 10px}
+.goal{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}.goal-top{display:flex;justify-content:space-between;gap:10px}.progress{height:8px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:12px}.progress>div{height:100%;background:var(--primary);border-radius:99px}.toggle{display:flex;gap:8px;margin-bottom:15px}.toggle button{flex:1;padding:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:10px}.toggle button.active{background:var(--soft);color:var(--primary);border-color:var(--primary)}
+.notice{padding:12px;border-radius:10px;background:var(--soft);color:var(--text);font-size:13px;margin-bottom:15px}.danger{color:var(--red)!important}.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.quick-btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:12px;padding:13px;text-align:left}.quick-btn strong{display:block;margin-top:5px}.site-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.global-toggle{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}.global-toggle input{width:18px;height:18px;accent-color:var(--primary)}
+@media(max-width:950px){.cards{grid-template-columns:repeat(2,1fr)}.section-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){aside{display:none}.app{display:block}main{margin:0;width:100%;padding:16px 14px 88px}.mobile-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.mobile-head .brand{padding:0;font-size:18px}.topbar{display:block}.topbar h1{font-size:23px}.month-nav{margin-top:12px}.cards{grid-template-columns:1fr 1fr;gap:10px}.card{padding:14px;border-radius:13px}.stat-value{font-size:19px}.table{min-width:650px}.bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:20;padding:7px 4px}.bottom-nav button{border:0;background:transparent;color:var(--muted);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px}.bottom-nav button.active{color:var(--primary)}.form-grid{grid-template-columns:1fr}.site-controls{align-items:flex-start;flex-direction:column}}
+@media(min-width:701px){.bottom-nav{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+<div class="brand"><i data-lucide="wallet"></i>Budget Planner</div>
+<nav>
+<button data-view="dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</button>
+<button data-view="transactions"><i data-lucide="arrow-left-right"></i>Transacties</button>
+<button data-view="accounts"><i data-lucide="landmark"></i>Rekeningen</button>
+<button data-view="crypto"><i data-lucide="bitcoin"></i>Crypto</button>
+
+<button data-view="dealplug"><i data-lucide="shopping-bag"></i>DealPlugNL</button>
+<button data-view="recurring"><i data-lucide="repeat"></i>Terugkerend</button>
+</nav>
+<div class="bottom-tools"><button class="theme-btn" id="themeBtn"><i data-lucide="moon"></i><span>Licht/donker</span></button></div>
+</aside>
+<main>
+<div class="mobile-head"><div class="brand"><i data-lucide="wallet"></i>Budget Planner</div><button class="icon-btn" id="mobileTheme"><i data-lucide="moon"></i></button></div>
+<div class="site-controls">
+<div class="small">Alles wordt automatisch lokaal in deze browser opgeslagen.</div>
+
+</div>
+<section id="dashboard" class="view"></section>
+<section id="transactions" class="view"></section>
+<section id="accounts" class="view"></section>
+<section id="crypto" class="view"></section>
+
+<section id="dealplug" class="view"></section>
+<section id="recurring" class="view"></section>
+</main>
+</div>
+<div class="bottom-nav">
+<button data-view="dashboard"><i data-lucide="layout-dashboard"></i>Home</button>
+<button data-view="transactions"><i data-lucide="arrow-left-right"></i>Transacties</button>
+<button data-view="accounts"><i data-lucide="landmark"></i>Rekeningen</button>
+<button data-view="crypto"><i data-lucide="bitcoin"></i>Crypto</button>
+<button data-view="dealplug"><i data-lucide="shopping-bag"></i>DealPlugNL</button>
+</div>
+
+<script>
+"use strict";
+
+const STORAGE_KEY="budgetPlannerV2";
+const DEFAULT_ACCOUNTS=[
+{id:"acc1",name:"ABN Betaalrekening",type:"betaal",balance:0,icon:"wallet"},
+{id:"acc2",name:"ABN Spaarrekening",type:"spaar",balance:0,icon:"piggy-bank"},
+{id:"acc3",name:"Revolut Betaalrekening",type:"revolut-betaal",balance:0,icon:"credit-card"},
+{id:"acc4",name:"Revolut Spaarrekening",type:"revolut-spaar",balance:0,icon:"landmark"}
+];
+const categories=["Wonen","Boodschappen","Auto","Benzine","Vervoer","Abonnementen","Uit eten","Entertainment","Kleding","Vakantie","Gezondheid","Sport","Verzekeringen","Belastingen","Salaris","Freelance","Sparen","Overig"];
+const quickExpenses=[["Boodschappen","shopping-cart"],["Tanken","fuel"],["Uit eten","utensils"],["Abonnement","credit-card"],["Kleding","shirt"],["Vervoer","car"],["Entertainment","gamepad-2"],["Vakantie","plane"],["Gezondheid","heart-pulse"],["Overig","more-horizontal"],["Crypto","bitcoin"]];
+
+function freshData(){
+return {theme:"light",cryptoEnabled:true,crypto:0,cryptoEntries:[],accounts:structuredClone(DEFAULT_ACCOUNTS),transactions:[],budgets:[],goals:[],recurring:[],weeklySalary:{enabled:false,amount:0,accountId:"",description:"Wekelijks loon"},dealplug:{opening:0,entries:[]},processedRecurring:{}};
+}
+function loadData(){
+let raw=null;
+try{raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")}catch(e){}
+if(!raw){
+  try{
+    const old=JSON.parse(localStorage.getItem("budgetPlannerV1")||"null");
+    if(old) raw=old;
+  }catch(e){}
+}
+const d=raw||freshData();
+d.theme=d.theme==="dark"?"dark":"light";
+d.cryptoEnabled=typeof d.cryptoEnabled==="boolean"?d.cryptoEnabled:true;
+d.crypto=Number(d.crypto)||0;
+d.accounts=Array.isArray(d.accounts)&&d.accounts.length?d.accounts:structuredClone(DEFAULT_ACCOUNTS);
+const rename={"Betaalrekening":"ABN Betaalrekening","Spaarrekening":"ABN Spaarrekening"};
+d.accounts.forEach(a=>{if(rename[a.name])a.name=rename[a.name];a.balance=Number(a.balance)||0});
+const savings=d.accounts.filter(a=>a.type==="spaar"||a.type==="revolut-spaar"||/spaarrekening/i.test(a.name));
+d.accounts=savings.length?savings:[structuredClone(DEFAULT_ACCOUNTS[1])];
+d.transactions=Array.isArray(d.transactions)?d.transactions:[];
+d.budgets=Array.isArray(d.budgets)?d.budgets:[];
+d.goals=Array.isArray(d.goals)?d.goals:[];
+d.recurring=Array.isArray(d.recurring)?d.recurring:[];
+d.cryptoEntries=Array.isArray(d.cryptoEntries)?d.cryptoEntries:[];
+d.dealplug=d.dealplug&&typeof d.dealplug==="object"?d.dealplug:{opening:0,entries:[]};
+d.dealplug.opening=Number(d.dealplug.opening)||0;
+d.dealplug.entries=Array.isArray(d.dealplug.entries)?d.dealplug.entries:[];
+d.weeklySalary=d.weeklySalary&&typeof d.weeklySalary==="object"?d.weeklySalary:{enabled:false,amount:0,accountId:d.accounts[0]?.id||"",description:"Wekelijks loon"};
+d.weeklySalary.enabled=!!d.weeklySalary.enabled;
+d.weeklySalary.amount=Number(d.weeklySalary.amount)||0;
+d.weeklySalary.accountId=(d.accounts.some(a=>a.id===d.weeklySalary.accountId)?d.weeklySalary.accountId:d.accounts[0]?.id)||"";
+d.processedRecurring=d.processedRecurring&&typeof d.processedRecurring==="object"?d.processedRecurring:{};
+return d;
+}
+let data=loadData();
+let activeView="dashboard";
+let currentMonth=new Date();
+currentMonth.setDate(1);
+
+const $=id=>document.getElementById(id);
+const euro=n=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(Number(n)||0);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const dateKey=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`};
+const monthKey=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}`};
+const monthName=()=>currentMonth.toLocaleDateString("nl-NL",{month:"long",year:"numeric"});
+const today=()=>{const x=new Date();return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`};
+const accountById=id=>data.accounts.find(a=>a.id===id);
+const monthTransactions=()=>data.transactions.filter(t=>monthKey(t.date)===monthKey(currentMonth));
+
+function persist(){
+localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+}
+function saveAndRender(){persist();render();}
+function notify(msg){alert(msg);}
+
+function setActiveView(view){
+activeView=view;
+document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===view));
+document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+}
+function navEvents(){
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>setActiveView(b.dataset.view)));
+}
+function themeToggle(){data.theme=data.theme==="dark"?"light":"dark";saveAndRender();}
+function setupGlobalControls(){
+$("themeBtn").onclick=themeToggle;
+$("mobileTheme").onclick=themeToggle;
+}
+
+function processRecurringTransactions(){
+const now=new Date();
+const realMonth=monthKey(now);
+const day=now.getDate();
+let changed=false;
+data.recurring.forEach(r=>{
+const marker=realMonth+"_"+r.id;
+if(data.processedRecurring[marker])return;
+if(day<Number(r.day||1))return;
+const acc=accountById(r.accountId);
+if(!acc)return;
+const amount=Number(r.amount)||0;
+if(amount<=0)return;
+if(r.kind==="expense"&&acc.balance<amount)return;
+const txDate=new Date(now.getFullYear(),now.getMonth(),Number(r.day||1));
+const tx={id:uid(),description:r.description,amount,date:dateKey(txDate),category:r.category,accountId:r.accountId,kind:r.kind,recurringId:r.id};
+data.transactions.push(tx);
+acc.balance += r.kind==="income"?amount:-amount;
+data.processedRecurring[marker]=true;
+changed=true;
+});
+if(changed)persist();
+}
+
+function render(){
+document.documentElement.dataset.theme=data.theme;
+$("crypto").style.display="";
+renderDashboard();renderTransactions();renderAccounts();renderCrypto();renderDealPlug();renderRecurring();
+setActiveView(activeView);
+lucide.createIcons();
+}
+
+function renderDashboard(){
+const ts=monthTransactions();
+const income=ts.filter(t=>t.kind==="income").reduce((s,t)=>s+Number(t.amount),0);
+const expenses=ts.filter(t=>t.kind==="expense").reduce((s,t)=>s+Number(t.amount),0);
+const cash=data.accounts.reduce((s,a)=>s+Number(a.balance),0);
+const net=income-expenses;
+const dpIncome=data.dealplug.entries.filter(e=>e.kind==="income").reduce((s,e)=>s+Number(e.amount),0);
+const dpCosts=data.dealplug.entries.filter(e=>e.kind==="expense").reduce((s,e)=>s+Number(e.amount),0);
+const dpBalance=Number(data.dealplug.opening)+dpIncome-dpCosts;
+const recent=[...ts].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
+$("dashboard").innerHTML=`
+<div class="topbar"><div><h1>Dashboard</h1><div class="subtitle">Je financiële overzicht</div></div>
+<div class="month-nav"><button class="icon-btn" id="prevMonth"><i data-lucide="chevron-left"></i></button><strong style="min-width:145px;text-align:center;text-transform:capitalize">${monthName()}</strong><button class="icon-btn" id="nextMonth"><i data-lucide="chevron-right"></i></button></div></div>
+<div class="cards">
+<div class="card"><div class="stat-label"><i data-lucide="wallet"></i>Beschikbaar geld</div><div class="stat-value">${euro(cash)}</div></div>
+<div class="card"><div class="stat-label"><i data-lucide="arrow-down-left"></i>Deze maand binnen</div><div class="stat-value positive">${euro(income)}</div></div>
+<div class="card"><div class="stat-label"><i data-lucide="arrow-up-right"></i>Deze maand eruit</div><div class="stat-value negative">${euro(expenses)}</div></div>
+<div class="card"><div class="stat-label"><i data-lucide="${net>=0?"trending-up":"trending-down"}"></i>Deze maand saldo</div><div class="stat-value ${net>=0?"positive":"negative"}">${euro(net)}</div></div>
+</div>
+<div class="section-grid">
+<div class="card"><div class="section-title">Geld binnen</div><div class="stat-value positive">${euro(income)}</div><div class="small" style="margin-top:8px">Inkomsten deze maand</div></div>
+<div class="card"><div class="section-title">Geld eruit</div><div class="stat-value negative">${euro(expenses)}</div><div class="small" style="margin-top:8px">Uitgaven deze maand</div></div>
+</div>
+<div class="section-grid">
+<div class="card"><div class="section-title">Spaarrekeningen</div><div class="account-list">${data.accounts.map(a=>`<div class="account"><div class="account-left"><div class="account-icon"><i data-lucide="${a.icon}"></i></div><div>${esc(a.name)}</div></div><div class="amount">${euro(a.balance)}</div></div>`).join("")}</div></div>
+<div class="card"><div class="section-title">DealPlugNL</div><div class="small">Beginstand + verkopen - kosten</div><div class="stat-value ${dpBalance>=0?"positive":"negative"}" style="margin-top:8px">${euro(dpBalance)}</div><div class="small" style="margin-top:6px">Huidige stand</div></div>
+</div>
+<div class="card transactions"><div class="section-title">Snelle uitgave</div>
+<div class="quick-grid">
+<button class="quick-btn" data-quick-expense="Boodschappen"><i data-lucide="shopping-cart"></i><strong>Boodschappen</strong><span class="small">Bedrag invoeren</span></button>
+<button class="quick-btn" data-quick-expense="Eten"><i data-lucide="utensils"></i><strong>Eten</strong><span class="small">Bedrag invoeren</span></button>
+<button class="quick-btn" id="quickOtherToggle"><i data-lucide="more-horizontal"></i><strong>Overige</strong><span class="small">Categorie kiezen</span></button>
+</div>
+<div id="quickOtherPanel" style="display:none;margin-top:14px">
+<div class="form-grid">
+<div class="field"><label>Categorie</label><select id="quickOtherCategory"><option value="Tanken">Tanken</option><option value="Abonnement">Abonnement</option><option value="Kleding">Kleding</option><option value="Vervoer">Vervoer</option><option value="Entertainment">Entertainment</option><option value="Vakantie">Vakantie</option><option value="Gezondheid">Gezondheid</option><option value="Overig">Overig</option></select></div>
+<div class="field"><label>Bedrag (€)</label><input id="quickOtherAmount" type="number" min="0.01" step=".01" inputmode="decimal" placeholder="Bijv. 25"></div>
+</div>
+<div class="form-actions"><button class="btn primary" id="quickOtherAdd"><i data-lucide="plus"></i>Uitgave toevoegen</button></div>
+</div>
+<div class="small" style="margin-top:8px">Wordt alleen als uitgave geregistreerd en verandert je spaarrekening niet.</div>
+</div>
+<div class="card transactions"><div class="section-title">Snelle inkomsten</div>
+<div class="quick-grid">
+<button class="quick-btn" data-quick-income="salary"><i data-lucide="briefcase"></i><strong>Loon uit werk</strong><span class="small">Bedrag invoeren</span></button>
+<button class="quick-btn" data-quick-income="dealplug"><i data-lucide="shopping-bag"></i><strong>Verkopen DealPlugNL</strong><span class="small">Verkoop toevoegen</span></button>
+</div></div>
+<div class="card transactions"><div class="section-title">Recente transacties <button class="btn primary" id="dashboardAdd"><i data-lucide="plus"></i>Toevoegen</button></div>
+${recent.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Omschrijving</th><th>Categorie</th><th>Datum</th><th>Bedrag</th></tr></thead><tbody>${recent.map(t=>transactionRow(t,false)).join("")}</tbody></table></div>`:`<div class="empty">Nog geen transacties in deze maand.</div>`}</div>`;
+$("prevMonth").onclick=()=>{currentMonth.setMonth(currentMonth.getMonth()-1);render()};
+$("nextMonth").onclick=()=>{currentMonth.setMonth(currentMonth.getMonth()+1);render()};
+$("dashboardAdd").onclick=()=>{setActiveView("transactions");setTimeout(()=>$("description")?.focus(),0)};
+document.querySelectorAll("[data-quick-expense]").forEach(btn=>btn.onclick=()=>{
+const category=btn.dataset.quickExpense;
+const entered=prompt(`Bedrag voor ${category} (€):`);
+if(entered===null)return;
+const amount=Number(String(entered).replace(",",".").trim());
+if(!Number.isFinite(amount)||amount<=0){notify("Vul een geldig bedrag in.");return}
+quickExpense(category,amount);
+});
+$("quickOtherToggle").onclick=()=>{
+const panel=$("quickOtherPanel");
+panel.style.display=panel.style.display==="none"?"block":"none";
+};
+$("quickOtherAdd").onclick=()=>{
+const category=$("quickOtherCategory").value;
+const amount=Number(String($("quickOtherAmount").value).replace(",",".").trim());
+if(!Number.isFinite(amount)||amount<=0){notify("Vul een geldig bedrag in.");return}
+quickExpense(category,amount);
+$("quickOtherAmount").value="";
+};
+document.querySelectorAll("[data-quick-income]").forEach(btn=>btn.onclick=()=>{
+const type=btn.dataset.quickIncome;
+const label=type==="dealplug"?"Verkoop DealPlugNL":"Loon uit werk";
+const entered=prompt(`Bedrag voor ${label} (€):`);
+if(entered===null)return;
+const amount=Number(String(entered).replace(",",".").trim());
+if(!Number.isFinite(amount)||amount<=0){notify("Vul een geldig bedrag in.");return}
+if(type==="dealplug")addDealPlugEntry("income",amount,"Verkoop abonnement");
+else addWorkIncome(amount);
+});
+}
+
+function quickExpense(category,amount){
+const tx={id:uid(),description:category,amount,date:today(),category,accountId:null,kind:"expense",quickOnly:true};
+data.transactions.push(tx);saveAndRender();
+}
+function addWorkIncome(amount){
+const acc=data.accounts[0];
+if(!acc){notify("Geen spaarrekening gevonden.");return}
+data.transactions.push({id:uid(),description:"Loon uit werk",amount,date:today(),category:"Salaris",accountId:acc.id,kind:"income"});
+acc.balance+=amount;saveAndRender();
+}
+function addCryptoContribution(amount){
+data.cryptoEntries.push({id:uid(),type:"in",amount,date:today(),description:"Crypto inleg"});
+data.crypto=(Number(data.crypto)||0)+amount;saveAndRender();
+}
+function addDealPlugEntry(kind,amount,description){
+data.dealplug.entries.push({id:uid(),kind,amount,date:today(),description});saveAndRender();
+}
+
+function transactionRow(t,full){
+const acc=accountById(t.accountId);
+const to=accountById(t.toAccountId);
+const sign=t.kind==="income"?"+":t.kind==="transfer"?"↔":"-";
+const cls=t.kind==="income"?"positive":t.kind==="expense"?"negative":"";
+return `<tr><td>${esc(t.description)}</td><td><span class="badge">${esc(t.category)}</span></td><td>${new Date(t.date).toLocaleDateString("nl-NL")}</td>${full?`<td>${esc(t.quickOnly?"Uitgavenregistratie":(acc?.name||"-"))}${t.kind==="transfer"&&to?` → ${esc(to.name)}`:""}</td>`:""}<td class="${cls}">${sign}${euro(t.amount)}</td>${full?`<td><div class="actions"><button data-edit="${t.id}" title="Bewerken"><i data-lucide="pencil"></i></button><button data-delete="${t.id}" class="danger" title="Verwijderen"><i data-lucide="trash-2"></i></button></div></td>`:""}</tr>`;
+}
+
+function renderTransactions(){
+const ts=[...monthTransactions()].sort((a,b)=>new Date(b.date)-new Date(a.date));
+$("transactions").innerHTML=`
+<div class="topbar"><div><h1>Transacties</h1><div class="subtitle">Inkomsten en uitgaven van ${monthName()}</div></div></div>
+<div class="card"><div class="section-title">Nieuwe transactie</div>
+<form id="transactionForm">
+<div class="toggle"><button type="button" data-kind="expense" class="active">Uitgave</button><button type="button" data-kind="income">Inkomst</button><button type="button" data-kind="transfer">Overboeking</button></div>
+<div class="form-grid">
+<div class="field"><label>Omschrijving</label><input id="description" required placeholder="Bijv. Boodschappen"></div>
+<div class="field"><label>Bedrag (€)</label><input id="amount" required type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0,00"></div>
+<div class="field"><label>Datum</label><input id="date" type="date" value="${today()}" required></div>
+<div class="field" id="categoryField"><label>Categorie</label><select id="category">${categories.map(c=>`<option>${c}</option>`).join("")}</select></div>
+<div class="field"><label id="accountLabel">Rekening</label><select id="account">${data.accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("")}</select></div>
+<div class="field" id="transferField" style="display:none"><label>Geld naar</label><select id="transferTo">${data.accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("")}</select></div>
+</div>
+<div class="form-actions"><button class="btn primary" type="submit"><i data-lucide="plus"></i>Transactie toevoegen</button></div>
+</form></div>
+<div class="card transactions"><div class="section-title">Transacties</div>
+${ts.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Omschrijving</th><th>Categorie</th><th>Datum</th><th>Rekening</th><th>Bedrag</th><th></th></tr></thead><tbody>${ts.map(t=>transactionRow(t,true)).join("")}</tbody></table></div>`:`<div class="empty">Nog geen transacties.</div>`}</div>`;
+
+let kind="expense";
+document.querySelectorAll("#transactionForm [data-kind]").forEach(btn=>btn.onclick=()=>{
+kind=btn.dataset.kind;
+document.querySelectorAll("#transactionForm [data-kind]").forEach(x=>x.classList.toggle("active",x===btn));
+$("transferField").style.display=kind==="transfer"?"block":"none";
+$("categoryField").style.display=kind==="transfer"?"none":"block";
+$("accountLabel").textContent=kind==="transfer"?"Van rekening":"Rekening";
+});
+$("transactionForm").onsubmit=e=>{
+e.preventDefault();
+const description=$("description").value.trim();
+const amount=Number($("amount").value);
+const date=$("date").value;
+const accountId=$("account").value;
+if(!description){notify("Vul een omschrijving in.");return}
+if(!Number.isFinite(amount)||amount<=0){notify("Vul een geldig bedrag in.");return}
+if(!date){notify("Kies een datum.");return}
+if(kind==="transfer"){
+const from=accountById(accountId),to=accountById($("transferTo").value);
+if(!from||!to||from.id===to.id){notify("Kies twee verschillende rekeningen.");return}
+if(from.balance<amount){notify("Onvoldoende saldo op de bronrekening.");return}
+from.balance-=amount;to.balance+=amount;
+data.transactions.push({id:uid(),description,amount,date,category:"Overboeking",accountId:from.id,toAccountId:to.id,kind:"transfer"});
+}else{
+const acc=accountById(accountId);
+if(!acc){notify("Kies een rekening.");return}
+if(kind==="expense"&&acc.balance<amount){notify("Onvoldoende saldo op deze rekening.");return}
+acc.balance+=kind==="income"?amount:-amount;
+data.transactions.push({id:uid(),description,amount,date,category:$("category").value,accountId,kind});
+}
+saveAndRender();
+};
+document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editTransaction(b.dataset.edit));
+document.querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>deleteTransaction(b.dataset.delete));
+}
+
+function editTransaction(tid){
+const t=data.transactions.find(x=>x.id===tid);if(!t)return;
+const val=prompt("Nieuw bedrag (€):",String(t.amount));
+if(val===null)return;
+const n=Number(val);if(!Number.isFinite(n)||n<=0){notify("Ongeldig bedrag.");return}
+if(t.kind==="transfer"){
+const from=accountById(t.accountId),to=accountById(t.toAccountId);
+if(!from||!to)return;
+from.balance+=t.amount;to.balance-=t.amount;
+if(from.balance<n){from.balance-=t.amount;to.balance+=t.amount;notify("Onvoldoende saldo voor deze wijziging.");return}
+from.balance-=n;to.balance+=n;
+}else{
+if(t.quickOnly){
+t.amount=n;
+}else{
+const acc=accountById(t.accountId);if(!acc)return;
+acc.balance+=t.kind==="income"?-t.amount:t.amount;
+if(t.kind==="expense"&&acc.balance<n){acc.balance-=t.amount;notify("Onvoldoende saldo voor deze wijziging.");return}
+t.amount=n;acc.balance+=t.kind==="income"?n:-n;
+}
+}
+t.amount=n;saveAndRender();
+}
+function deleteTransaction(tid){
+const t=data.transactions.find(x=>x.id===tid);if(!t)return;
+if(!confirm("Deze transactie verwijderen?"))return;
+if(t.kind==="transfer"){const from=accountById(t.accountId),to=accountById(t.toAccountId);if(from)from.balance+=t.amount;if(to)to.balance-=t.amount}
+else if(!t.quickOnly){const acc=accountById(t.accountId);if(acc)acc.balance+=t.kind==="income"?-t.amount:t.amount}
+data.transactions=data.transactions.filter(x=>x.id!==tid);saveAndRender();
+}
+
+function renderAccounts(){
+$("accounts").innerHTML=`<div class="topbar"><div><h1>Rekeningen</h1><div class="subtitle">Je actuele geldsaldi</div></div></div>
+<div class="notice"><i data-lucide="info"></i> Nieuwe transacties veranderen de saldi automatisch. Gebruik "Saldo aanpassen" alleen voor een beginsaldo of correctie.</div>
+<div class="cards">${data.accounts.map(a=>`<div class="card"><div class="stat-label"><i data-lucide="${a.icon}"></i>${esc(a.name)}</div><div class="stat-value">${euro(a.balance)}</div><button class="btn" style="margin-top:14px" data-adjust="${a.id}"><i data-lucide="pencil"></i>Saldo aanpassen</button></div>`).join("")}</div>`;
+document.querySelectorAll("[data-adjust]").forEach(b=>b.onclick=()=>adjustAccount(b.dataset.adjust));
+}
+function adjustAccount(id){
+const a=accountById(id);if(!a)return;
+const v=prompt(`Nieuw saldo voor ${a.name}:`,a.balance.toFixed(2));
+if(v===null)return;const n=Number(v);
+if(!Number.isFinite(n)){notify("Ongeldig bedrag.");return}
+a.balance=n;saveAndRender();
+}
+
+function renderCrypto(){
+const entries=[...data.cryptoEntries].sort((a,b)=>new Date(b.date)-new Date(a.date));
+const invested=entries.filter(e=>e.type==="in").reduce((s,e)=>s+Number(e.amount),0);
+const cashouts=entries.filter(e=>e.type==="out").reduce((s,e)=>s+Number(e.amount),0);
+const result=cashouts-invested;
+const openPosition=Math.max(0,invested-cashouts);
+data.crypto=invested;
+$("crypto").innerHTML=`
+<div class="topbar"><div><h1>Crypto</h1><div class="subtitle">Inleg, uitcashen en gerealiseerd resultaat</div></div></div>
+<div class="cards">
+<div class="card"><div class="stat-label"><i data-lucide="arrow-down-left"></i>Totale inleg</div><div class="stat-value">${euro(invested)}</div></div>
+<div class="card"><div class="stat-label"><i data-lucide="arrow-up-right"></i>Uitgecasht</div><div class="stat-value">${euro(cashouts)}</div></div>
+<div class="card"><div class="stat-label"><i data-lucide="${result>=0?"trending-up":"trending-down"}"></i>Gerealiseerd resultaat</div><div class="stat-value ${result>=0?"positive":"negative"}">${result>=0?"+":""}${euro(result)}</div></div>
+<div class="card"><div class="stat-label"><i data-lucide="coins"></i>Nog in crypto</div><div class="stat-value">${euro(openPosition)}</div><div class="small" style="margin-top:6px">Op basis van inleg minus uitcashen</div></div>
+</div>
+<div class="card"><div class="section-title">Crypto toevoegen</div>
+<div class="form-grid"><div class="field"><label>Nieuwe inleg (€)</label><input id="cryptoIn" type="number" min="0.01" step=".01" inputmode="decimal"></div><div class="field"><label>Uitcashen (€)</label><input id="cryptoOut" type="number" min="0.01" step=".01" inputmode="decimal"></div></div>
+<div class="form-actions"><button class="btn primary" id="addCryptoIn"><i data-lucide="plus"></i>Inleg toevoegen</button><button class="btn" id="addCryptoOut"><i data-lucide="arrow-up-right"></i>Uitcashen</button></div>
+<div class="notice" style="margin-top:14px">Crypto staat los van je spaarrekeningen. Het wordt niet meegerekend als beschikbaar bankgeld.</div></div>
+<div class="card transactions"><div class="section-title">Crypto transacties</div>
+${entries.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Omschrijving</th><th>Datum</th><th>Bedrag</th></tr></thead><tbody>${entries.map(e=>`<tr><td>${esc(e.description||"Crypto")}</td><td>${new Date(e.date).toLocaleDateString("nl-NL")}</td><td class="${e.type==="in"?"negative":"positive"}">${e.type==="in"?"-":"+"}${euro(e.amount)}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">Nog geen crypto-transacties.</div>`}</div>`;
+$("addCryptoIn").onclick=()=>{const n=Number($("cryptoIn").value);if(!Number.isFinite(n)||n<=0){notify("Vul een geldig bedrag in.");return}addCryptoContribution(n)};
+$("addCryptoOut").onclick=()=>{const n=Number($("cryptoOut").value);if(!Number.isFinite(n)||n<=0){notify("Vul een geldig bedrag in.");return}data.cryptoEntries.push({id:uid(),type:"out",amount:n,date:today(),description:"Crypto uitcash"});saveAndRender()};
+}
+
+function renderBudgets(){
+const ts=monthTransactions();
+$("budgets").innerHTML=`<div class="topbar"><div><h1>Budgetten</h1><div class="subtitle">Maandbudgetten voor ${monthName()}</div></div></div>
+<div class="card"><div class="section-title">Budget toevoegen</div><form id="budgetForm"><div class="form-grid"><div class="field"><label>Categorie</label><select id="budgetCat">${categories.filter(c=>!["Salaris","Freelance"].includes(c)).map(c=>`<option>${c}</option>`).join("")}</select></div><div class="field"><label>Budget per maand (€)</label><input id="budgetAmount" type="number" min="0.01" step=".01" required inputmode="decimal"></div></div><div class="form-actions"><button class="btn primary"><i data-lucide="plus"></i>Budget opslaan</button></div></form></div>
+<div class="card transactions"><div class="section-title">Jouw budgetten</div>${data.budgets.length?data.budgets.map((b,i)=>{const spent=ts.filter(t=>t.kind==="expense"&&t.category===b.category).reduce((s,t)=>s+Number(t.amount),0);const pct=b.amount>0?Math.min(100,spent/b.amount*100):0;return `<div class="goal"><div class="goal-top"><strong>${esc(b.category)}</strong><span>${euro(spent)} / ${euro(b.amount)}</span></div><div class="progress"><div style="width:${pct}%"></div></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px" class="small"><span>${pct.toFixed(0)}% gebruikt</span><button class="icon-btn danger" data-budget-delete="${i}"><i data-lucide="trash-2"></i></button></div></div>`}).join(""):`<div class="empty">Nog geen budgetten ingesteld.</div>`}</div>`;
+$("budgetForm").onsubmit=e=>{e.preventDefault();const amount=Number($("budgetAmount").value);if(!Number.isFinite(amount)||amount<=0){notify("Vul een geldig budget in.");return}data.budgets.push({category:$("budgetCat").value,amount});saveAndRender()};
+document.querySelectorAll("[data-budget-delete]").forEach(b=>b.onclick=()=>{if(confirm("Budget verwijderen?")){data.budgets.splice(Number(b.dataset.budgetDelete),1);saveAndRender()}});
+}
+
+function renderDealPlug(){
+const entries=[...data.dealplug.entries].sort((a,b)=>new Date(b.date)-new Date(a.date));
+const income=entries.filter(e=>e.kind==="income").reduce((s,e)=>s+Number(e.amount),0);
+const costs=entries.filter(e=>e.kind==="expense").reduce((s,e)=>s+Number(e.amount),0);
+const balance=Number(data.dealplug.opening)+income-costs;
+$("dealplug").innerHTML=`
+<div class="topbar"><div><h1>DealPlugNL</h1><div class="subtitle">Inkomsten en kosten van je abonnementen</div></div></div>
+<div class="cards"><div class="card"><div class="stat-label"><i data-lucide="wallet"></i>Beginstand</div><div class="stat-value">${euro(data.dealplug.opening)}</div></div>
+<div class="card"><div class="stat-label"><i data-lucide="arrow-down-left"></i>Inkomsten</div><div class="stat-value positive">${euro(income)}</div></div>
+<div class="card"><div class="stat-label"><i data-lucide="arrow-up-right"></i>Kosten</div><div class="stat-value negative">${euro(costs)}</div></div>
+<div class="card"><div class="stat-label"><i data-lucide="calculator"></i>Huidige stand</div><div class="stat-value ${balance>=0?"positive":"negative"}">${euro(balance)}</div></div></div>
+<div class="card"><div class="section-title">Beginstand instellen</div><div class="form-grid"><div class="field"><label>Beginstand (€)</label><input id="dpOpening" type="number" step=".01" inputmode="decimal" value="${Number(data.dealplug.opening).toFixed(2)}"></div></div><div class="form-actions"><button class="btn primary" id="saveDpOpening"><i data-lucide="save"></i>Beginstand opslaan</button></div></div>
+<div class="card"><div class="section-title">Inkomsten / kosten toevoegen</div><form id="dpForm"><div class="toggle"><button type="button" data-dpkind="income" class="active">Inkomst</button><button type="button" data-dpkind="expense">Kosten</button></div>
+<div class="form-grid"><div class="field"><label>Omschrijving</label><input id="dpDesc" required placeholder="Bijv. Spotify Premium"></div><div class="field"><label>Bedrag (€)</label><input id="dpAmount" required type="number" min="0.01" step=".01" inputmode="decimal"></div><div class="field"><label>Datum</label><input id="dpDate" type="date" value="${today()}" required></div></div><div class="form-actions"><button class="btn primary"><i data-lucide="plus"></i>Toevoegen</button></div></form></div>
+<div class="card transactions"><div class="section-title">Verkopen en kosten</div>
+${entries.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Omschrijving</th><th>Datum</th><th>Type</th><th>Bedrag</th><th></th></tr></thead><tbody>${entries.map(e=>`<tr><td>${esc(e.description)}</td><td>${new Date(e.date).toLocaleDateString("nl-NL")}</td><td>${e.kind==="income"?"Inkomst":"Kosten"}</td><td class="${e.kind==="income"?"positive":"negative"}">${e.kind==="income"?"+":"-"}${euro(e.amount)}</td><td><button class="icon-btn danger" data-dp-delete="${e.id}"><i data-lucide="trash-2"></i></button></td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">Nog geen DealPlugNL-verkopen of kosten.</div>`}</div>`;
+$("saveDpOpening").onclick=()=>{const n=Number($("dpOpening").value);if(!Number.isFinite(n)){notify("Ongeldige beginstand.");return}data.dealplug.opening=n;saveAndRender()};
+let kind="income";
+document.querySelectorAll("[data-dpkind]").forEach(b=>b.onclick=()=>{kind=b.dataset.dpkind;document.querySelectorAll("[data-dpkind]").forEach(x=>x.classList.toggle("active",x===b))});
+$("dpForm").onsubmit=e=>{e.preventDefault();const amount=Number($("dpAmount").value);if(!Number.isFinite(amount)||amount<=0){notify("Vul een geldig bedrag in.");return}data.dealplug.entries.push({id:uid(),kind,amount,date:$("dpDate").value,description:$("dpDesc").value.trim()});saveAndRender()};
+document.querySelectorAll("[data-dp-delete]").forEach(b=>b.onclick=()=>{if(confirm("Deze DealPlugNL-post verwijderen?")){data.dealplug.entries=data.dealplug.entries.filter(e=>e.id!==b.dataset.dpDelete);saveAndRender()}});
+}
+
+function renderRecurring(){
+$("recurring").innerHTML=`<div class="topbar"><div><h1>Terugkerend</h1><div class="subtitle">Vaste inkomsten en kosten automatisch verwerken</div></div></div>
+<div class="card"><div class="section-title">Wekelijks loon</div><div class="small" style="margin-bottom:14px">Automatisch iedere woensdag als inkomen toevoegen. Als je de app later in de week opent, wordt het loon van die woensdag alsnog geregistreerd.</div>
+<div class="form-grid"><div class="field"><label>Bedrag (€)</label><input id="weeklySalaryAmount" type="number" min="0.01" step=".01" inputmode="decimal" placeholder="Bijv. 550" value="${data.weeklySalary?.amount||""}"></div><div class="field"><label>Op rekening</label><select id="weeklySalaryAccount">${data.accounts.map(a=>`<option value="${a.id}" ${a.id===(data.weeklySalary?.accountId||data.accounts[0]?.id)?"selected":""}>${esc(a.name)}</option>`).join("")}</select></div></div>
+<div class="form-actions"><label class="toggle" style="display:flex;align-items:center;gap:10px"><input id="weeklySalaryEnabled" type="checkbox" ${data.weeklySalary?.enabled?"checked":""}> Inschakelen</label><button type="button" class="btn primary" id="saveWeeklySalary">Wekelijks loon opslaan</button></div></div>
+<div class="notice"><i data-lucide="info"></i> Op de gekozen dag wordt de transactie automatisch één keer per maand toegevoegd. Een uitgave wordt alleen verwerkt als er voldoende saldo is.</div>
+<div class="card"><div class="section-title">Terugkerende transactie toevoegen</div><form id="recForm"><div class="toggle"><button type="button" data-reckind="expense" class="active">Uitgave</button><button type="button" data-reckind="income">Inkomst</button></div>
+<div class="form-grid"><div class="field"><label>Omschrijving</label><input id="recDesc" required placeholder="Bijv. Huur"></div><div class="field"><label>Bedrag (€)</label><input id="recAmount" type="number" min="0.01" step=".01" required inputmode="decimal"></div><div class="field"><label>Categorie</label><select id="recCat">${categories.map(c=>`<option>${c}</option>`).join("")}</select></div><div class="field"><label>Rekening</label><select id="recAcc">${data.accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("")}</select></div><div class="field"><label>Dag van de maand</label><input id="recDay" type="number" min="1" max="28" value="1" required></div></div>
+<div class="form-actions"><button class="btn primary"><i data-lucide="repeat"></i>Toevoegen</button></div></form></div>
+<div class="card transactions"><div class="section-title">Vaste transacties</div>${data.recurring.length?data.recurring.map((r,i)=>`<div class="account"><div class="account-left"><div class="account-icon"><i data-lucide="repeat"></i></div><div><strong>${esc(r.description)}</strong><div class="small">Elke maand op dag ${r.day} · ${esc(r.category)} · ${esc(accountById(r.accountId)?.name||"-")}</div></div></div><div style="display:flex;align-items:center;gap:12px"><span class="${r.kind==="income"?"positive":"negative"}">${r.kind==="income"?"+":"-"}${euro(r.amount)}</span><button class="icon-btn danger" data-rec-delete="${i}"><i data-lucide="trash-2"></i></button></div></div>`).join(""):`<div class="empty">Nog geen terugkerende transacties.</div>`}</div>`;
+$("saveWeeklySalary").onclick=()=>{
+  const amount=Number($("weeklySalaryAmount").value);
+  const accountId=$("weeklySalaryAccount").value;
+  const enabled=$("weeklySalaryEnabled").checked;
+  if(enabled && (!Number.isFinite(amount)||amount<=0)){notify("Vul een geldig loonbedrag in.");return}
+  data.weeklySalary={enabled,amount:amount||0,accountId,description:"Wekelijks loon"};
+  persist();
+  render();
+  notify(enabled?"Wekelijks loon opgeslagen.":"Wekelijks loon uitgeschakeld.");
+};
+let kind="expense";
+document.querySelectorAll("[data-reckind]").forEach(b=>b.onclick=()=>{kind=b.dataset.reckind;document.querySelectorAll("[data-reckind]").forEach(x=>x.classList.toggle("active",x===b))});
+$("recForm").onsubmit=e=>{e.preventDefault();const amount=Number($("recAmount").value),day=Number($("recDay").value);if(!Number.isFinite(amount)||amount<=0||day<1||day>28){notify("Controleer bedrag en dag.");return}data.recurring.push({id:uid(),description:$("recDesc").value.trim(),amount,category:$("recCat").value,accountId:$("recAcc").value,day,kind});saveAndRender()};
+document.querySelectorAll("[data-rec-delete]").forEach(b=>b.onclick=()=>{if(confirm("Terugkerende transactie verwijderen?")){data.recurring.splice(Number(b.dataset.recDelete),1);saveAndRender()}});
+}
+
+
+function processWeeklySalary(){
+  const ws=data.weeklySalary;
+  if(!ws || !ws.enabled || !(Number(ws.amount)>0)) return;
+  const now=new Date();
+  const day=now.getDay();
+  if(day===0 || day===1 || day===2) return;
+
+  // The salary belongs to this week's Wednesday. If the app is opened later
+  // in the week, it is still added once for that Wednesday.
+  const wednesday=new Date(now);
+  wednesday.setDate(now.getDate()-(day-3));
+  const dateKey=`${wednesday.getFullYear()}-${String(wednesday.getMonth()+1).padStart(2,"0")}-${String(wednesday.getDate()).padStart(2,"0")}`;
+  const key=`salary_${dateKey}`;
+  if(data.processedRecurring[key]) return;
+
+  const acc=accountById(ws.accountId)||data.accounts[0];
+  if(!acc) return;
+
+  const amount=Number(ws.amount);
+  data.transactions.push({
+    id:uid(),
+    description:ws.description||"Wekelijks loon",
+    amount,
+    date:dateKey,
+    category:"Salaris",
+    accountId:acc.id,
+    kind:"income"
+  });
+  acc.balance+=amount;
+  data.processedRecurring[key]=true;
+  save();
+}
+
+function init(){
+processRecurringTransactions();
+processWeeklySalary();
+navEvents();
+setupGlobalControls();
+render();
+}
+init();
+</script>
+</body>
+</html>
