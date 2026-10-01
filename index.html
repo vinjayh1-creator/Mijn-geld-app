@@ -1263,6 +1263,15 @@ const accountStand=hasDashboardSnapshot
 // De handmatige rekeningstand zelf blijft ongewijzigd door transacties.
 const cash=accountStand+(income-expenses);
 const net=income-expenses;
+// Laat gewone transacties ook direct terugkomen in de weergegeven rekeningstand.
+// Het maandelijkse snapshot blijft het uitgangspunt; de transacties van deze maand worden daarop toegepast.
+const accountMonthEffect=(ids)=>ts.filter(t=>ids.includes(t.accountId)).reduce((sum,t)=>{
+  if(t.kind==="income") return sum+Number(t.amount||0);
+  if(t.kind==="expense") return sum-Number(t.amount||0);
+  return sum;
+},0);
+const dashboardAbnBalance=Number(dashboardSnapshot.acc1||0)+accountMonthEffect(["acc1","acc2"]);
+const dashboardRevolutBalance=revolutTotal(dashboardSnapshot)+accountMonthEffect(["acc4","acc3"]);
 const dealplugEntries=Array.isArray(data.dealplug?.entries)?data.dealplug.entries:[];
 const dpIncome=dealplugEntries.filter(e=>e.kind==="income").reduce((s,e)=>s+Number(e.amount||0),0);
 const dpCosts=dealplugEntries.filter(e=>e.kind==="expense"||e.kind==="cost"||e.kind==="kosten").reduce((s,e)=>s+Number(e.amount||0),0);
@@ -1291,11 +1300,11 @@ $("dashboard").innerHTML=`
 </div>
 <div class="section-grid">
 <div class="card"><div class="section-title">Rekeningen</div><div class="small" style="margin-bottom:9px">Stand ${dashboardSnapshotLabel}</div><div class="account-list">
-<div class="account"><div class="account-left"><div class="account-icon"><i data-lucide="landmark"></i></div><div>ABN Amro</div></div><div class="amount">${protectedEuro(dashboardSnapshot.acc1||0)}</div></div>
+<div class="account"><div class="account-left"><div class="account-icon"><i data-lucide="landmark"></i></div><div>ABN Amro</div></div><div class="amount">${protectedEuro(dashboardAbnBalance)}</div></div>
 <details class="dashboard-revolut-details">
 <summary class="account dashboard-revolut-summary">
 <div class="account-left"><div class="account-icon"><i data-lucide="wallet"></i></div><div><strong>Revolut</strong><div class="small">Klik om rekeningen te bekijken</div></div></div>
-<div class="amount">${protectedEuro(revolutTotal(dashboardSnapshot))}</div>
+<div class="amount">${protectedEuro(dashboardRevolutBalance)}</div>
 </summary>
 <div class="dashboard-revolut-details-inner">
   <div class="small dashboard-subrow"><span>Revolut privé</span><strong>${protectedEuro(valForDashboard("private",dashboardSnapshot))}</strong></div>
