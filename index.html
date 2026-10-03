@@ -245,6 +245,42 @@ h1{letter-spacing:-.035em}
 .snapshot-total strong,.snapshot-diff strong{font-size:13px}
 @media(max-width:700px){.account-snapshots-card{width:100%}}
 
+/* Compacte Revolut-standen bij Transacties */
+.revolut-balance-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin-bottom:14px;
+}
+.revolut-balance-tile{
+  padding:8px 9px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface-2,#f8fafc);
+  min-width:0;
+}
+.revolut-balance-tile div{
+  font-size:11px;
+  line-height:1.2;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.revolut-balance-tile strong{
+  display:block;
+  margin-top:3px;
+  font-size:14px;
+  line-height:1.2;
+  white-space:nowrap;
+}
+@media(max-width:700px){
+  .revolut-balance-grid{gap:5px;margin-bottom:12px}
+  .revolut-balance-tile{padding:7px 6px;border-radius:9px}
+  .revolut-balance-tile div{font-size:9px}
+  .revolut-balance-tile strong{font-size:12px;margin-top:2px}
+}
+
 /* Consistente ruimte rond DealPlugNL */
 #dashboard .dealplug-dashboard-card {
   margin-top: 16px !important;
@@ -1046,6 +1082,25 @@ nav button.active{background:var(--soft);color:var(--primary);}
 #dashboard .dashboard-crypto-pokemon-card .section-title svg{width:18px;height:18px;color:var(--primary);}
 @media(max-width:700px){#dashboard .dashboard-crypto-pokemon-card{margin-top:16px !important;} .dashboard-investment-grid{grid-template-columns:1fr 1fr !important;}}
 </style>
+
+<style id="transaction-account-tiles-dark-fix">
+/* Donkere modus: rekeningtegels bij Transacties */
+[data-theme="dark"] #transactions .revolut-balance-grid .revolut-balance-tile {
+  background:var(--card) !important;
+  color:var(--text) !important;
+  border-color:var(--border) !important;
+}
+[data-theme="dark"] #transactions .revolut-balance-grid .revolut-balance-tile * {
+  color:var(--text) !important;
+}
+[data-theme="dark"] #transactions .revolut-balance-grid .revolut-balance-tile .small {
+  color:var(--muted) !important;
+}
+[data-theme="dark"] #transactions .revolut-balance-grid .revolut-balance-tile .stat-value,
+[data-theme="dark"] #transactions .revolut-balance-grid .revolut-balance-tile strong {
+  color:var(--text) !important;
+}
+</style>
 </head>
 <body>
 <div class="app">
@@ -1233,12 +1288,72 @@ lucide.createIcons();
 }
 
 function valForDashboard(type,snapshot){
-  if(type==="private"){
-    const subs=snapshot?.revolutSubaccounts;
-    if(subs && Object.prototype.hasOwnProperty.call(subs,"private")) return Number(subs.private||0);
-    return Number(snapshot?.acc4||0);
-  }
+  if(type==="private") return revolutPrivateBalance(snapshot);
   return 0;
+}
+
+function monthlyAccountEffect(month,ids){
+  const ts=Array.isArray(data.transactions)?data.transactions:[];
+  return ts.filter(t=>monthKey(t.date)===month).reduce((sum,t)=>{
+    const amount=Number(t.amount||0);
+    if(t.kind==="income" && ids.includes(t.accountId)) return sum+amount;
+    if(t.kind==="expense" && ids.includes(t.accountId)) return sum-amount;
+    if(t.kind==="transfer"){
+      if(ids.includes(t.accountId)) sum-=amount;
+      if(ids.includes(t.toAccountId)) sum+=amount;
+    }
+    return sum;
+  },0);
+}
+
+function displayedAccountBalances(month){
+  const key=month||monthKey(currentMonth);
+  const snap=data.accountSnapshots?.[key]||{};
+
+  // Actuele saldi zijn leidend voor het scherm. De maandstand blijft alleen
+  // de historische referentie en wordt nooit aangepast door overboekingen.
+  // ABN en Revolut privé hebben een echte account-balance; DealPlug/Crypto
+  // worden vanuit hun maandstand + mutaties berekend.
+  const abnAccount=accountById("acc2");
+  const revolutAccount=accountById("acc4");
+  const realCurrentMonth=monthKey(new Date());
+  const isCurrentMonth=key===realCurrentMonth;
+
+  // Voor de huidige maand gebruiken we de actuele rekeningstatus.
+  // Voor historische maanden gebruiken we juist de opgeslagen maandstand.
+  // Zo overschrijft een actuele rekeningstand nooit een eerder opgeslagen maandstand.
+  const abn=isCurrentMonth && abnAccount
+    ? Number(abnAccount.balance||0)
+    : Number(snap.acc1||0);
+
+  const privateRevolut=isCurrentMonth && revolutAccount
+    ? Number(revolutAccount.balance||0)
+    : Number(snap.acc4||0);
+
+  const monthTransfers=(Array.isArray(data.transactions)?data.transactions:[])
+    .filter(t=>t.kind==="revolutTransfer" && (t.month===key || monthKey(t.date)===key));
+
+  const dealplugBase=Number(snap.revolutSubaccounts?.dealplug||0);
+  const cryptoBase=Number(snap.revolutSubaccounts?.crypto||0);
+
+  const dealplugTransfers=monthTransfers.reduce((sum,t)=>{
+    const n=Number(t.amount||0);
+    if(t.fromTarget==="dealplug") return sum-n;
+    if(t.toTarget==="dealplug") return sum+n;
+    return sum;
+  },0);
+  const cryptoTransfers=monthTransfers.reduce((sum,t)=>{
+    const n=Number(t.amount||0);
+    if(t.fromTarget==="crypto") return sum-n;
+    if(t.toTarget==="crypto") return sum+n;
+    return sum;
+  },0);
+
+  const dealplug=dealplugBase+dealplugTransfers+dealplugNetForMonth(key);
+  const crypto=cryptoBase+cryptoTransfers;
+  const revolut=privateRevolut+dealplug+crypto;
+
+  return {abn,privateRevolut,dealplug,crypto,revolut,total:abn+revolut};
 }
 
 function renderDashboard(){
@@ -1257,21 +1372,17 @@ const dashboardSnapshotKey=monthKey(currentMonth);
 const dashboardSnapshot=data.accountSnapshots?.[dashboardSnapshotKey]||{};
 const hasDashboardSnapshot=Object.prototype.hasOwnProperty.call(dashboardSnapshot,"acc1")||Object.prototype.hasOwnProperty.call(dashboardSnapshot,"acc4");
 const accountStand=hasDashboardSnapshot
-  ? Number(dashboardSnapshot.acc1||0)+revolutTotal(dashboardSnapshot)
+  ? Number(dashboardSnapshot.acc1||0)+revolutTotal(dashboardSnapshot,dashboardSnapshotKey)
   : data.accounts.reduce((s,a)=>s+Number(a.balance),0);
 // Beschikbaar geld = opgeslagen maandstand + inkomsten - uitgaven.
 // De handmatige rekeningstand zelf blijft ongewijzigd door transacties.
-const cash=accountStand+(income-expenses);
+const cash=accountStand+(incomeTransactions-expenseTransactions);
 const net=income-expenses;
 // Laat gewone transacties ook direct terugkomen in de weergegeven rekeningstand.
 // Het maandelijkse snapshot blijft het uitgangspunt; de transacties van deze maand worden daarop toegepast.
-const accountMonthEffect=(ids)=>ts.filter(t=>ids.includes(t.accountId)).reduce((sum,t)=>{
-  if(t.kind==="income") return sum+Number(t.amount||0);
-  if(t.kind==="expense") return sum-Number(t.amount||0);
-  return sum;
-},0);
-const dashboardAbnBalance=Number(dashboardSnapshot.acc1||0)+accountMonthEffect(["acc1","acc2"]);
-const dashboardRevolutBalance=revolutTotal(dashboardSnapshot)+accountMonthEffect(["acc4","acc3"]);
+const displayedBalances=displayedAccountBalances(dashboardSnapshotKey);
+const dashboardAbnBalance=displayedBalances.abn;
+const dashboardRevolutBalance=displayedBalances.revolut;
 const dealplugEntries=Array.isArray(data.dealplug?.entries)?data.dealplug.entries:[];
 const dpIncome=dealplugEntries.filter(e=>e.kind==="income").reduce((s,e)=>s+Number(e.amount||0),0);
 const dpCosts=dealplugEntries.filter(e=>e.kind==="expense"||e.kind==="cost"||e.kind==="kosten").reduce((s,e)=>s+Number(e.amount||0),0);
@@ -1307,14 +1418,14 @@ $("dashboard").innerHTML=`
 <div class="amount">${protectedEuro(dashboardRevolutBalance)}</div>
 </summary>
 <div class="dashboard-revolut-details-inner">
-  <div class="small dashboard-subrow"><span>Revolut privé</span><strong>${protectedEuro(valForDashboard("private",dashboardSnapshot))}</strong></div>
-  <div class="small dashboard-subrow"><span>DealPlugNL</span><strong>${protectedEuro(Number(dashboardSnapshot.revolutSubaccounts?.dealplug||0))}</strong></div>
-  <div class="small dashboard-subrow"><span>Crypto / Aandelen</span><strong>${protectedEuro(Number(dashboardSnapshot.revolutSubaccounts?.crypto||0))}</strong></div>
+  <div class="small dashboard-subrow"><span>Revolut privé</span><strong>${protectedEuro(displayedBalances.privateRevolut)}</strong></div>
+  <div class="small dashboard-subrow"><span>DealPlugNL</span><strong>${protectedEuro(displayedBalances.dealplug)}</strong></div>
+  <div class="small dashboard-subrow"><span>Crypto / Aandelen</span><strong>${protectedEuro(displayedBalances.crypto)}</strong></div>
 </div>
 </details>
 </div>
 ${(()=>{
-  const currentTotal=Number(dashboardSnapshot.acc1||0)+revolutTotal(dashboardSnapshot);
+  const currentTotal=Number(dashboardSnapshot.acc1||0)+revolutTotal(dashboardSnapshot,dashboardSnapshotKey);
   const previousDate=new Date(currentMonth);
   previousDate.setMonth(previousDate.getMonth()-1);
   const previousKey=monthKey(previousDate);
@@ -1322,7 +1433,7 @@ ${(()=>{
   if(!previousSnapshot){
     return '<div class="account-change flat"><i data-lucide="minus"></i><span>Geen vorige maand beschikbaar</span></div>';
   }
-  const previousTotal=Number(previousSnapshot.acc1||0)+revolutTotal(previousSnapshot);
+  const previousTotal=Number(previousSnapshot.acc1||0)+revolutTotal(previousSnapshot,previousKey);
   const difference=currentTotal-previousTotal;
   if(difference>0){
     return `<div class="account-change up"><i data-lucide="trending-up"></i><span>${protectedEuro(difference)} meer dan vorige maand</span></div>`;
@@ -1513,9 +1624,9 @@ data.dealplug.entries.push({id:uid(),kind,amount,date:today(),description});save
 function transactionRow(t,full){
 const acc=accountById(t.accountId);
 const to=accountById(t.toAccountId);
-const sign=t.kind==="income"?"+":t.kind==="transfer"?"↔":t.kind==="revolutAdjustment"?(t.direction==="add"?"+":"-"):"-";
+const sign=t.kind==="income"?"+":t.kind==="transfer"||t.kind==="revolutTransfer"?"↔":t.kind==="revolutAdjustment"?(t.direction==="add"?"+":"-"):"-";
 const cls=t.kind==="income"||t.kind==="revolutAdjustment"&&t.direction==="add"?"positive":t.kind==="expense"||t.kind==="revolutAdjustment"&&t.direction==="remove"?"negative":"";
-const accountLabel=t.kind==="revolutAdjustment"?({private:"Revolut privé",dealplug:"DealPlugNL",crypto:"Crypto / Aandelen"}[t.target]||"Revolut"):(t.quickOnly?"Uitgavenregistratie":(acc?.name||"-"));
+const accountLabel=t.kind==="revolutAdjustment"?({private:"Revolut privé",dealplug:"DealPlugNL",crypto:"Crypto / Aandelen"}[t.target]||"Revolut"):t.kind==="revolutTransfer"?`${({private:"Revolut privé",dealplug:"DealPlugNL",crypto:"Crypto / Aandelen"}[t.fromTarget]||"Revolut")} → ${({private:"Revolut privé",dealplug:"DealPlugNL",crypto:"Crypto / Aandelen"}[t.toTarget]||"Revolut")}`:(t.quickOnly?"Uitgavenregistratie":(acc?.name||"-"));
 const categoryLabel=t.kind==="revolutAdjustment"?"Revolut mutatie":t.category;
 return `<tr><td>${esc(t.description)}</td><td><span class="badge">${esc(categoryLabel)}</span></td><td>${new Date(t.date).toLocaleDateString("nl-NL")}</td>${full?`<td>${esc(accountLabel)}${t.kind==="transfer"&&to?` → ${esc(to.name)}`:""}</td>`:""}<td class="${cls}">${sign}${euro(t.amount)}</td>${full?`<td><div class="actions"><button data-edit="${t.id}" title="Bewerken"><i data-lucide="pencil"></i></button><button data-delete="${t.id}" class="danger" title="Verwijderen"><i data-lucide="trash-2"></i></button></div></td>`:""}</tr>`;
 }
@@ -1538,29 +1649,42 @@ $("transactions").innerHTML=`
 <div class="form-actions"><button class="btn primary" type="submit"><i data-lucide="plus"></i>Transactie toevoegen</button></div>
 
 <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border)">
-  <div class="section-title">Geld toevoegen aan Revolut</div>
-  <div class="small" style="margin-bottom:12px">Kies een Revolut-subrekening en voer zelf het bedrag in. Dit wordt toegevoegd aan de rekeningstand van de huidige maand en niet als gewone inkomsten geboekt.</div>
+  <div class="section-title">Geld schuiven binnen Revolut</div>
+  <div class="small" style="margin-bottom:12px">Verplaats geld tussen Revolut privé, DealPlugNL en Crypto / Aandelen. Het totaal van Revolut blijft gelijk.</div>
+  <div class="revolut-balance-grid">
+    <div class="revolut-balance-tile"><div>ABN Amro</div><strong>${protectedEuro(displayedAccountBalances(monthKey(currentMonth)).abn)}</strong></div>
+    <div class="revolut-balance-tile"><div>Revolut privé</div><strong>${protectedEuro(displayedAccountBalances(monthKey(currentMonth)).privateRevolut)}</strong></div>
+    <div class="revolut-balance-tile"><div>DealPlugNL</div><strong>${protectedEuro(displayedAccountBalances(monthKey(currentMonth)).dealplug)}</strong></div>
+    <div class="revolut-balance-tile"><div>Crypto / Aandelen</div><strong>${protectedEuro(displayedAccountBalances(monthKey(currentMonth)).crypto)}</strong></div>
+  </div>
   <div class="form-grid">
     <div class="field">
-      <label>Revolut-rekening</label>
-      <select id="revolutAddTarget">
+      <label>Van rekening</label>
+      <select id="revolutTransferFrom">
         <option value="private">Revolut privé</option>
         <option value="dealplug">DealPlugNL</option>
         <option value="crypto">Crypto / Aandelen</option>
       </select>
     </div>
     <div class="field">
+      <label>Naar rekening</label>
+      <select id="revolutTransferTo">
+        <option value="dealplug">DealPlugNL</option>
+        <option value="private">Revolut privé</option>
+        <option value="crypto">Crypto / Aandelen</option>
+      </select>
+    </div>
+    <div class="field">
       <label>Bedrag (€)</label>
-      <input id="revolutAddAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Bijv. 500">
+      <input id="revolutTransferAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Bijv. 500">
     </div>
     <div class="field">
       <label>Opmerking</label>
-      <input id="revolutAdjustmentNote" type="text" maxlength="120" placeholder="Bijv. Geld naar privérekening">
+      <input id="revolutTransferNote" type="text" maxlength="120" placeholder="Bijv. Geld naar DealPlugNL">
     </div>
   </div>
   <div class="form-actions">
-    <button type="button" class="btn primary" id="addRevolutAmount"><i data-lucide="plus"></i>Bedrag toevoegen</button>
-    <button type="button" class="btn" id="removeRevolutAmount"><i data-lucide="minus"></i>Bedrag afhalen</button>
+    <button type="button" class="btn primary" id="transferRevolutAmount"><i data-lucide="arrow-right-left"></i>Geld overboeken</button>
   </div>
 </div>
 </form></div>
@@ -1587,14 +1711,63 @@ if(!date){notify("Kies een datum.");return}
 if(kind==="transfer"){
 const from=accountById(accountId),to=accountById($("transferTo").value);
 if(!from||!to||from.id===to.id){notify("Kies twee verschillende rekeningen.");return}
-if(from.balance<amount){notify("Onvoldoende saldo op de bronrekening.");return}
-from.balance-=amount;to.balance+=amount;
+
+// Gebruik voor de saldo-check dezelfde maandstanden als het dashboard.
+// ABN Amro wordt in de maandstanden als acc1 opgeslagen, terwijl de
+// transactiekeuze acc2 gebruikt. Revolut privé gebruikt acc4.
+const month=monthKey(new Date(date));
+const snap=data.accountSnapshots?.[month];
+const transferEffect=(ids)=>data.transactions.filter(t=>monthKey(t.date)===month).reduce((sum,t)=>{
+  const n=Number(t.amount||0);
+  if(t.kind==="income" && ids.includes(t.accountId)) return sum+n;
+  if(t.kind==="expense" && ids.includes(t.accountId)) return sum-n;
+  if(t.kind==="transfer"){
+    if(ids.includes(t.accountId)) sum-=n;
+    if(ids.includes(t.toAccountId)) sum+=n;
+  }
+  return sum;
+},0);
+// Gebruik exact hetzelfde actuele saldo als de rekeningtegels op het
+// dashboard/transacties. Daardoor worden eerdere overboekingen meteen
+// meegenomen in de volgende saldo-check.
+const balancesBeforeTransfer=displayedAccountBalances(month);
+const sourceBalance=from.id==="acc2"
+  ? Number(balancesBeforeTransfer.abn||0)
+  : from.id==="acc4"
+    ? Number(balancesBeforeTransfer.privateRevolut||0)
+    : Number(from.balance||0);
+if(sourceBalance+0.000001<amount){
+  notify(`Overboeking geweigerd: onvoldoende saldo op ${from.name}. Beschikbaar: ${euro(sourceBalance)}.`);
+  return;
+}
+
+from.balance-=amount;
+to.balance+=amount;
+
+// Een overboeking verandert NOOIT de opgeslagen maandstand.
+// De maandstand is een vast historisch meetpunt; de actuele rekeningstanden
+// worden hierboven bijgewerkt en de overboeking blijft als transactie geregistreerd.
 data.transactions.push({id:uid(),description,amount,date,category:"Overboeking",accountId:from.id,toAccountId:to.id,kind:"transfer"});
 }else{
 const acc=accountById(accountId);
 if(!acc){notify("Kies een rekening.");return}
-// Gewone transacties zijn alleen registraties voor het dashboard en
-// veranderen niet de handmatig ingevoerde rekeningstand.
+
+// Een gewone inkomsten-/kostentransactie verandert ook het actuele saldo
+// van de gekozen rekening. De opgeslagen maandstand blijft een historisch
+// snapshot; alleen de actuele maandrekening wordt live bijgewerkt.
+const transactionMonth=monthKey(new Date(date));
+if(transactionMonth===monthKey(new Date())){
+  if(kind==="expense") {
+    if(Number(acc.balance||0)+0.000001<amount){
+      notify(`Transactie geweigerd: onvoldoende saldo op ${acc.name}. Beschikbaar: ${euro(acc.balance||0)}.`);
+      return;
+    }
+    acc.balance-=amount;
+  } else if(kind==="income") {
+    acc.balance+=amount;
+  }
+}
+
 data.transactions.push({id:uid(),description,amount,date,category:$("category").value,accountId,kind});
 }
 saveAndRender();
@@ -1632,11 +1805,50 @@ function changeRevolutSubaccountAmount(target, amount, direction, note){
   notify(`${euro(n)} ${direction==="remove"?"afgehaald van":"toegevoegd aan"} ${label}.`);
 }
 
-$("addRevolutAmount").onclick=()=>{
-  changeRevolutSubaccountAmount($("revolutAddTarget").value,$("revolutAddAmount").value,"add",$("revolutAdjustmentNote").value);
-};
-$("removeRevolutAmount").onclick=()=>{
-  changeRevolutSubaccountAmount($("revolutAddTarget").value,$("revolutAddAmount").value,"remove",$("revolutAdjustmentNote").value);
+$("transferRevolutAmount").onclick=()=>{
+  const from=$("revolutTransferFrom").value;
+  const to=$("revolutTransferTo").value;
+  const n=Number($("revolutTransferAmount").value);
+  const note=$("revolutTransferNote").value.trim();
+  if(from===to){notify("Kies twee verschillende Revolut-rekeningen.");return}
+  if(!Number.isFinite(n)||n<=0){notify("Vul een geldig bedrag in.");return}
+
+  const month=monthKey(currentMonth);
+  const label=x=>x==="private"?"Revolut privé":x==="dealplug"?"DealPlugNL":"Crypto / Aandelen";
+
+  // Gebruik uitsluitend het actuele saldo. De historische maandstand mag door
+  // een overboeking nooit worden aangepast.
+  const displayed=displayedAccountBalances(month);
+  const getCurrent=x=>x==="private"
+    ? Number(displayed.privateRevolut||0)
+    : x==="dealplug"
+      ? Number(displayed.dealplug||0)
+      : Number(displayed.crypto||0);
+  const fromBalance=getCurrent(from);
+  if(fromBalance+0.000001<n){notify(`Overboeking geweigerd: onvoldoende saldo op ${label(from)}. Beschikbaar: ${euro(fromBalance)}.`);return}
+
+  // Werk het actuele privé-saldo direct bij. DealPlug/Crypto worden via
+  // de transactiehistorie berekend; de historische maandstand blijft intact.
+  const privateAccount=accountById("acc4");
+  if(from==="private" && privateAccount) privateAccount.balance-=n;
+  if(to==="private" && privateAccount) privateAccount.balance+=n;
+
+  data.transactions.push({
+    id:uid(),
+    description:note||`Overboeking ${label(from)} → ${label(to)}`,
+    amount:n,
+    date:today(),
+    category:"Overboeking Revolut",
+    accountId:"revolut-subaccount",
+    kind:"revolutTransfer",
+    fromTarget:from,
+    toTarget:to,
+    month
+  });
+
+  persist();
+  render();
+  notify(`${euro(n)} overgeboekt van ${label(from)} naar ${label(to)}.`);
 };
 document.querySelectorAll("[data-revolut-quick]").forEach(b=>b.onclick=()=>{
   changeRevolutSubaccountAmount(b.dataset.revolutQuick,500,"add","");
@@ -1651,36 +1863,27 @@ const t=data.transactions.find(x=>x.id===tid);if(!t)return;
 const val=prompt("Nieuw bedrag (€):",String(t.amount));
 if(val===null)return;
 const n=Number(val);if(!Number.isFinite(n)||n<=0){notify("Ongeldig bedrag.");return}
-if(t.kind==="revolutAdjustment"){
-  const snap=data.accountSnapshots?.[t.month];
-  if(!snap){notify("Rekeningstand niet gevonden.");return}
-  snap.revolutSubaccounts=snap.revolutSubaccounts||{};
-  const current=t.target==="private"?Number(snap.acc4||0):Number(snap.revolutSubaccounts[t.target]||0);
-  const oldEffect=t.direction==="add"?t.amount:-t.amount;
-  const newEffect=t.direction==="add"?n:-n;
-  const next=current-oldEffect+newEffect;
-  if(next<0){notify("Onvoldoende saldo voor deze wijziging.");return}
-  if(t.target==="private")snap.acc4=next;else snap.revolutSubaccounts[t.target]=next;
+if(t.kind==="revolutTransfer"){
+  const privateAccount=accountById("acc4");
+  // Eerst de oude beweging terugdraaien op het actuele saldo.
+  if(privateAccount){
+    if(t.fromTarget==="private") privateAccount.balance+=Number(t.amount||0);
+    if(t.toTarget==="private") privateAccount.balance-=Number(t.amount||0);
+  }
+  // Controleer daarna het nieuwe bedrag vanuit de herstelde actuele bron.
+  const displayed=displayedAccountBalances(t.month);
+  const sourceBefore=t.fromTarget==="private"
+    ? Number(privateAccount?.balance||0)
+    : t.fromTarget==="dealplug" ? Number(displayed.dealplug||0) : Number(displayed.crypto||0);
+  if(sourceBefore<n){notify("Onvoldoende saldo voor dit nieuwe bedrag.");return}
+  if(privateAccount){
+    if(t.fromTarget==="private") privateAccount.balance-=n;
+    if(t.toTarget==="private") privateAccount.balance+=n;
+  }
   t.amount=n;
   persist();render();
   return;
 }
-if(t.kind==="transfer"){
-const from=accountById(t.accountId),to=accountById(t.toAccountId);
-if(!from||!to)return;
-from.balance+=t.amount;to.balance-=t.amount;
-if(from.balance<n){from.balance-=t.amount;to.balance+=t.amount;notify("Onvoldoende saldo voor deze wijziging.");return}
-from.balance-=n;to.balance+=n;
-}else{
-// Het wijzigen van een gewone transactie verandert alleen de transactie zelf,
-// niet de handmatig ingevoerde rekeningstand.
-t.amount=n;
-}
-t.amount=n;saveAndRender();
-}
-function deleteTransaction(tid){
-const t=data.transactions.find(x=>x.id===tid);if(!t)return;
-if(!confirm("Deze transactie verwijderen?"))return;
 if(t.kind==="revolutAdjustment"){
   const snap=data.accountSnapshots?.[t.month];
   if(snap){
@@ -1689,18 +1892,82 @@ if(t.kind==="revolutAdjustment"){
     const next=t.direction==="add"?current-t.amount:current+t.amount;
     if(t.target==="private")snap.acc4=Math.max(0,next);else snap.revolutSubaccounts[t.target]=Math.max(0,next);
   }
-}else if(t.kind==="transfer"){const from=accountById(t.accountId),to=accountById(t.toAccountId);if(from)from.balance+=t.amount;if(to)to.balance-=t.amount}
+}else if(t.kind==="transfer"){const from=accountById(t.accountId),to=accountById(t.toAccountId);if(from)from.balance+=t.amount;if(to)to.balance-=t.amount
+}else if(t.kind==="income"||t.kind==="expense"){
+  const acc=accountById(t.accountId);
+  if(acc && monthKey(new Date(t.date))===monthKey(new Date())){
+    if(t.kind==="income") acc.balance-=Number(t.amount||0);
+    else acc.balance+=Number(t.amount||0);
+  }
+}
+data.transactions=data.transactions.filter(x=>x.id!==tid);saveAndRender();
+}
+
+function deleteTransaction(tid){
+const t=data.transactions.find(x=>x.id===tid);if(!t)return;
+if(!confirm("Deze transactie verwijderen?"))return;
+if(t.kind==="revolutTransfer"){
+  const privateAccount=accountById("acc4");
+  if(privateAccount){
+    if(t.fromTarget==="private") privateAccount.balance+=Number(t.amount||0);
+    if(t.toTarget==="private") privateAccount.balance-=Number(t.amount||0);
+  }
+}else if(t.kind==="revolutAdjustment"){
+  const snap=data.accountSnapshots?.[t.month];
+  if(snap){
+    snap.revolutSubaccounts=snap.revolutSubaccounts||{};
+    const current=t.target==="private"?Number(snap.acc4||0):Number(snap.revolutSubaccounts[t.target]||0);
+    const next=t.direction==="add"?current-t.amount:current+t.amount;
+    if(t.target==="private")snap.acc4=Math.max(0,next);else snap.revolutSubaccounts[t.target]=Math.max(0,next);
+  }
+}else if(t.kind==="transfer"){
+  const from=accountById(t.accountId),to=accountById(t.toAccountId);
+  if(from)from.balance+=t.amount;
+  if(to)to.balance-=t.amount;
+}else if(t.kind==="income"||t.kind==="expense"){
+  const acc=accountById(t.accountId);
+  if(acc && monthKey(new Date(t.date))===monthKey(new Date())){
+    if(t.kind==="income") acc.balance-=Number(t.amount||0);
+    else acc.balance+=Number(t.amount||0);
+  }
+}
 data.transactions=data.transactions.filter(x=>x.id!==tid);saveAndRender();
 }
 
 let selectedSnapshotMonth="";
 
-function revolutSubTotal(snapshot){
-  const subs=snapshot?.revolutSubaccounts||{};
-  return Number(subs.dealplug||0)+Number(subs.crypto||0);
+function dealplugNetForMonth(month){
+  const entries=Array.isArray(data.dealplug?.entries)?data.dealplug.entries:[];
+  return entries.filter(e=>monthKey(e.date)===month).reduce((sum,e)=>{
+    const amount=Number(e.amount||0);
+    if(e.kind==="income") return sum+amount;
+    if(e.kind==="expense"||e.kind==="cost"||e.kind==="kosten") return sum-amount;
+    return sum;
+  },0);
 }
-function revolutTotal(snapshot){
-  return Number(snapshot?.acc4||0)+revolutSubTotal(snapshot);
+function dealplugBalanceForMonth(month,snapshot){
+  return Number(snapshot?.revolutSubaccounts?.dealplug||0)+dealplugNetForMonth(month);
+}
+function revolutPrivateCurrentBalance(month){
+  return Number(displayedAccountBalances(month).privateRevolut||0);
+}
+
+function revolutPrivateBalance(snapshot){
+  // Gebruik de maandstand als die expliciet is opgeslagen. Als die nog niet
+  // bestaat, gebruik dan het actuele Revolut-saldo uit de rekeninggegevens.
+  if(snapshot && Object.prototype.hasOwnProperty.call(snapshot,"acc4")){
+    return Number(snapshot.acc4||0);
+  }
+  const acc=accountById("acc4");
+  return Number(acc?.balance||0);
+}
+function revolutSubTotal(snapshot,month){
+  const subs=snapshot?.revolutSubaccounts||{};
+  const dealplug=month?dealplugBalanceForMonth(month,snapshot):Number(subs.dealplug||0);
+  return dealplug+Number(subs.crypto||0);
+}
+function revolutTotal(snapshot,month){
+  return revolutPrivateBalance(snapshot)+revolutSubTotal(snapshot,month);
 }
 
 function renderAccounts(){
@@ -1725,8 +1992,8 @@ const selectedIndex=months.findIndex(d=>key(d)===selectedSnapshotMonth);
 const selectedDate=months[selectedIndex];
 const selectedKey=key(selectedDate);
 const prev=selectedIndex>0?months[selectedIndex-1]:null;
-const total=val(selectedKey,"acc1")+revolutTotal(data.accountSnapshots?.[selectedKey]);
-const prevTotal=prev?(val(key(prev),"acc1")+revolutTotal(data.accountSnapshots?.[key(prev)])):0;
+const total=val(selectedKey,"acc1")+revolutTotal(data.accountSnapshots?.[selectedKey],selectedKey);
+const prevTotal=prev?(val(key(prev),"acc1")+revolutTotal(data.accountSnapshots?.[key(prev)],key(prev))):0;
 const cryptoTarget=Number(data.cryptoMonthlyTarget||500);
 const cryptoBalance=subVal(selectedKey,"crypto");
 const cryptoProgress=cryptoTarget>0?Math.min(100,(cryptoBalance/cryptoTarget)*100):0;
@@ -1754,7 +2021,7 @@ ${accounts.map(a=>`<div class="snapshot-row"><span>${a[1]}</span><div class="sna
     <strong>Revolut</strong>
     <span class="small">meerdere rekeningen</span>
   </div>
-  <strong>${euro(revolutTotal(data.accountSnapshots?.[selectedKey]))}</strong>
+  <strong>${euro(revolutTotal(data.accountSnapshots?.[selectedKey],selectedKey))}</strong>
 </div>
 
 <div id="revolutSubaccounts" style="display:none;padding:2px 0 4px 24px">
@@ -1764,7 +2031,7 @@ ${accounts.map(a=>`<div class="snapshot-row"><span>${a[1]}</span><div class="sna
   </div>
   <div class="snapshot-row">
     <span>DealPlugNL</span>
-    <div class="snapshot-input-wrap"><span>€</span><input type="number" min="0" step="0.01" inputmode="decimal" data-snapshot-month="${selectedKey}" data-snapshot-subaccount="dealplug" value="${subVal(selectedKey,"dealplug")||""}" placeholder="0,00"></div>
+    <div class="snapshot-input-wrap"><span>€</span><input type="number" min="0" step="0.01" inputmode="decimal" data-snapshot-month="${selectedKey}" data-snapshot-subaccount="dealplug" value="${dealplugBalanceForMonth(selectedKey,data.accountSnapshots?.[selectedKey])||""}" placeholder="0,00"></div>
   </div>
   <div class="snapshot-row">
     <div>
@@ -1815,7 +2082,16 @@ $("saveSnapshotBtn").onclick=()=>{
   document.querySelectorAll("[data-snapshot-account]").forEach(input=>{
     const raw=String(input.value||"").replace(",", ".").trim();
     const value=raw===""?0:Number(raw);
-    snap[input.dataset.snapshotAccount]=Number.isFinite(value)?value:0;
+    const cleanValue=Number.isFinite(value)?value:0;
+    snap[input.dataset.snapshotAccount]=cleanValue;
+
+    // Bij het opslaan van de stand van de huidige maand moet die ingevoerde stand
+    // ook de actuele account-state worden. Dashboard en Transacties lezen daarna
+    // exact dezelfde bron voor het huidige saldo.
+    if(monthToSave===monthKey(new Date()) && input.dataset.snapshotAccount==="acc1") {
+      const abnAccount=accountById("acc2");
+      if(abnAccount) abnAccount.balance=cleanValue;
+    }
   });
 
   snap.revolutSubaccounts=snap.revolutSubaccounts||{};
@@ -1823,7 +2099,20 @@ $("saveSnapshotBtn").onclick=()=>{
     const raw=String(input.value||"").replace(",", ".").trim();
     const value=raw===""?0:Number(raw);
     const id=input.dataset.snapshotSubaccount;
-    snap.revolutSubaccounts[id]=Number.isFinite(value)?value:0;
+    if(id==="private") {
+      // Revolut privé is de actuele hoofdrekening. Bij de huidige maand
+      // synchroniseren we de ingevoerde stand ook naar acc4.
+      const cleanValue=Number.isFinite(value)?value:0;
+      snap.acc4=cleanValue;
+      if(monthToSave===monthKey(new Date())) {
+        const revolutAccount=accountById("acc4");
+        if(revolutAccount) revolutAccount.balance=cleanValue;
+      }
+    } else if(id==="dealplug") {
+      snap.revolutSubaccounts[id]=Number.isFinite(value)?value-dealplugNetForMonth(monthToSave):0;
+    } else {
+      snap.revolutSubaccounts[id]=Number.isFinite(value)?value:0;
+    }
   });
 
   const parts=monthToSave.split("-").map(Number);
@@ -2121,11 +2410,12 @@ const income=entries.filter(e=>e.kind==="income").reduce((s,e)=>s+Number(e.amoun
 const costs=entries.filter(e=>e.kind==="expense"||e.kind==="cost"||e.kind==="kosten").reduce((s,e)=>s+Number(e.amount||0),0);
 const balance=Number(data.dealplug.opening)+income-costs;
 $("dealplug").innerHTML=`
-<div class="topbar"><div><h1>DealPlugNL</h1><div class="subtitle">Inkomsten en kosten van je abonnementen</div></div></div>
+<div class="topbar"><div><h1>DealPlugNL</h1><div class="subtitle">Inkomsten en kosten van je abonnementen — automatisch gekoppeld aan Revolut · DealPlugNL</div></div></div>
 <div class="cards"><div class="card"><div class="stat-label"><i data-lucide="wallet"></i>Beginstand</div><div class="stat-value">${protectedEuro(data.dealplug.opening)}</div></div>
 <div class="card"><div class="stat-label"><i data-lucide="arrow-down-left"></i>Inkomsten</div><div class="stat-value positive">${protectedEuro(income)}</div></div>
 <div class="card"><div class="stat-label"><i data-lucide="arrow-up-right"></i>Kosten</div><div class="stat-value negative">${protectedEuro(costs)}</div></div>
 <div class="card"><div class="stat-label"><i data-lucide="calculator"></i>Huidige stand</div><div class="stat-value ${balance>=0?"positive":"negative"}">${protectedEuro(balance)}</div></div></div>
+<div class="notice">Elke <strong>verkoop</strong> verhoogt automatisch <strong>Revolut · DealPlugNL</strong>. Elke <strong>kost</strong> verlaagt deze rekening. De DealPlugNL-activiteiten worden per maand verwerkt op basis van de gekozen datum.</div>
 <div class="card"><div class="section-title">Beginstand instellen</div><div class="form-grid"><div class="field"><label>Beginstand (€)</label><input id="dpOpening" type="number" step=".01" inputmode="decimal" value="${Number(data.dealplug.opening).toFixed(2)}"></div></div><div class="form-actions"><button class="btn primary" id="saveDpOpening"><i data-lucide="save"></i>Beginstand opslaan</button></div></div>
 <div class="card"><div class="section-title">Inkomsten / kosten toevoegen</div><form id="dpForm"><div class="toggle"><button type="button" data-dpkind="income" class="active">Inkomst</button><button type="button" data-dpkind="expense">Kosten</button></div>
 <div class="form-grid"><div class="field"><label>Omschrijving</label><input id="dpDesc" required placeholder="Bijv. Spotify Premium"></div><div class="field"><label>Bedrag (€)</label><input id="dpAmount" required type="number" min="0.01" step=".01" inputmode="decimal"></div><div class="field"><label>Datum</label><input id="dpDate" type="date" value="${today()}" required></div></div><div class="form-actions"><button class="btn primary"><i data-lucide="plus"></i>Toevoegen</button></div></form></div>
