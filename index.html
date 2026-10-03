@@ -1455,10 +1455,11 @@ ${(()=>{
 <div class="form-grid">
 <div class="field"><label>Categorie</label><select id="quickOtherCategory"><option value="Tanken">Tanken</option><option value="Abonnement">Abonnement</option><option value="Kleding">Kleding</option><option value="Vervoer">Vervoer</option><option value="Entertainment">Entertainment</option><option value="Vakantie">Vakantie</option><option value="Gezondheid">Gezondheid</option><option value="Overig">Overig</option></select></div>
 <div class="field"><label>Bedrag (€)</label><input id="quickOtherAmount" type="number" min="0.01" step=".01" inputmode="decimal" placeholder="Bijv. 25"></div>
+<div class="field" id="quickOtherDescriptionField" style="display:none"><label>Omschrijving</label><input id="quickOtherDescription" type="text" maxlength="120" placeholder="Bijv. Cadeau, reparatie, lunch"></div>
 </div>
 <div class="form-actions"><button class="btn primary" id="quickOtherAdd"><i data-lucide="plus"></i>Uitgave toevoegen</button></div>
 </div>
-<div class="small" style="margin-top:8px">Wordt alleen als uitgave geregistreerd en verandert je spaarrekening niet.</div>
+<div class="small" style="margin-top:8px">Wordt als uitgave geregistreerd en vermindert je ABN Amro spaarrekening.</div>
 </div>
 </div>
 <div class="card transactions">
@@ -1583,13 +1584,25 @@ quickExpense(category,amount);
 $("quickOtherToggle").onclick=()=>{
 const panel=$("quickOtherPanel");
 panel.style.display=panel.style.display==="none"?"block":"none";
+if(panel.style.display==="none"){
+  $("quickOtherDescriptionField").style.display="none";
+  $("quickOtherDescription").value="";
+}
+};
+$("quickOtherCategory").onchange=()=>{
+  const isOther=$("quickOtherCategory").value==="Overig";
+  $("quickOtherDescriptionField").style.display=isOther?"block":"none";
+  if(!isOther) $("quickOtherDescription").value="";
 };
 $("quickOtherAdd").onclick=()=>{
 const category=$("quickOtherCategory").value;
 const amount=Number(String($("quickOtherAmount").value).replace(",",".").trim());
 if(!Number.isFinite(amount)||amount<=0){notify("Vul een geldig bedrag in.");return}
-quickExpense(category,amount);
+const description=$("quickOtherDescription").value.trim();
+if(category==="Overig" && !description){notify("Vul een omschrijving in voor Overig.");$("quickOtherDescription").focus();return}
+quickExpense(category,amount,category==="Overig"?description:category);
 $("quickOtherAmount").value="";
+$("quickOtherDescription").value="";
 };
 document.querySelectorAll("[data-quick-income]").forEach(btn=>btn.onclick=()=>{
 const type=btn.dataset.quickIncome;
@@ -1603,9 +1616,29 @@ else addWorkIncome(amount);
 });
 }
 
-function quickExpense(category,amount){
-const tx={id:uid(),description:category,amount,date:today(),category,accountId:null,kind:"expense",quickOnly:true};
-data.transactions.push(tx);saveAndRender();
+function quickExpense(category,amount,description){
+  // Snelle uitgaven worden net als gewone uitgaven van de
+  // ABN Amro spaarrekening afgeboekt.
+  const savingsAccount=accountById("acc2");
+  if(!savingsAccount){notify("ABN Amro spaarrekening niet gevonden.");return}
+  if(Number(savingsAccount.balance||0)<amount){
+    notify(`Onvoldoende saldo op ${savingsAccount.name}. Beschikbaar: ${euro(savingsAccount.balance)}.`);
+    return;
+  }
+
+  savingsAccount.balance-=amount;
+  const tx={
+    id:uid(),
+    description:description||category,
+    amount,
+    date:today(),
+    category,
+    accountId:savingsAccount.id,
+    kind:"expense",
+    quickOnly:true
+  };
+  data.transactions.push(tx);
+  saveAndRender();
 }
 function addWorkIncome(amount){
 const acc=data.accounts[0];
