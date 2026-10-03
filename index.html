@@ -2715,6 +2715,152 @@ init();
  .dashboard-recurring-row{padding:9px 0;}
 }
 </style>
+
+<style id="dashboard-compact-selected-tiles">
+/* Compactere dashboardtegels: rekeningen, vaste kosten/loon, investeringen en DealPlugNL */
+#dashboard > .section-grid > .card:first-child{
+  padding:14px !important;
+}
+#dashboard > .section-grid > .card:first-child .section-title{
+  font-size:14px;
+  margin-bottom:9px;
+}
+#dashboard > .section-grid > .card:first-child .account-list{
+  gap:7px;
+}
+#dashboard > .section-grid > .card:first-child .account{
+  padding:8px 9px;
+  border-radius:11px;
+}
+#dashboard > .section-grid > .card:first-child .account-icon{
+  width:30px;
+  height:30px;
+  border-radius:9px;
+}
+#dashboard > .section-grid > .card:first-child .account-left{
+  gap:9px;
+  font-size:12px;
+}
+#dashboard > .section-grid > .card:first-child .small{
+  font-size:10px;
+}
+#dashboard > .section-grid > .card:first-child .amount{
+  font-size:13px;
+  padding:6px 2px 0;
+}
+
+#dashboard .dashboard-recurring-summary{
+  padding:15px !important;
+}
+#dashboard .dashboard-recurring-summary .section-title{
+  font-size:14px;
+  margin-bottom:8px;
+}
+#dashboard .dashboard-recurring-summary > .small{
+  font-size:11px;
+}
+#dashboard .dashboard-recurring-summary > div[style*="grid-template-columns:1fr 1fr"]{
+  gap:8px !important;
+  margin-top:10px !important;
+}
+#dashboard .dashboard-recurring-summary > div[style*="grid-template-columns:1fr 1fr"] > div{
+  padding:8px !important;
+  border-radius:10px !important;
+}
+#dashboard .dashboard-recurring-summary > div[style*="grid-template-columns:1fr 1fr"] > div .negative,
+#dashboard .dashboard-recurring-summary > div[style*="grid-template-columns:1fr 1fr"] > div .positive{
+  font-size:16px !important;
+}
+#dashboard .dashboard-recurring-summary > div[style*="grid-template-columns:1fr 1fr"] .small{
+  font-size:10px;
+}
+#dashboard .dashboard-recurring-summary > div[style*="border-top"]{
+  margin-top:9px !important;
+  padding-top:9px !important;
+}
+#dashboard .dashboard-recurring-summary > div[style*="border-top"] > .small{
+  font-size:10px !important;
+}
+#dashboard .dashboard-recurring-summary > div[style*="border-top"] > div:not(.small){
+  padding:6px 0 !important;
+  font-size:11px !important;
+}
+
+#dashboard .dashboard-crypto-pokemon-card{
+  padding:15px !important;
+}
+#dashboard .dashboard-crypto-pokemon-card .section-title{
+  font-size:14px;
+  margin-bottom:8px;
+}
+#dashboard .dashboard-crypto-pokemon-card > .small{
+  font-size:11px;
+}
+#dashboard .dashboard-crypto-pokemon-card .dashboard-investment-grid{
+  gap:7px !important;
+  margin-top:10px !important;
+}
+#dashboard .dashboard-crypto-pokemon-card .dashboard-investment-grid > div{
+  padding:8px !important;
+  border-radius:10px !important;
+}
+#dashboard .dashboard-crypto-pokemon-card .dashboard-investment-grid .small{
+  font-size:10px;
+}
+#dashboard .dashboard-crypto-pokemon-card .dashboard-investment-grid > div > div:last-child{
+  font-size:16px !important;
+  margin-top:2px !important;
+}
+#dashboard .dashboard-crypto-pokemon-card > div[style*="border-top"]{
+  margin-top:8px !important;
+  padding-top:8px !important;
+  gap:8px !important;
+}
+#dashboard .dashboard-crypto-pokemon-card > div[style*="border-top"] > div{
+  font-size:11px;
+}
+#dashboard .dashboard-crypto-pokemon-card > div[style*="border-top"] .small{
+  font-size:10px;
+}
+#dashboard .dashboard-crypto-pokemon-card > div[style*="border-top"] > div > div:last-child{
+  font-size:14px !important;
+  margin-top:2px !important;
+}
+
+#dashboard .dealplug-dashboard-card{
+  padding:15px !important;
+}
+#dashboard .dealplug-dashboard-card .section-title{
+  font-size:14px;
+  margin-bottom:8px;
+}
+#dashboard .dealplug-dashboard-card > .small{
+  font-size:11px;
+}
+#dashboard .dealplug-dashboard-card .stat-value{
+  font-size:20px !important;
+}
+#dashboard .dealplug-dashboard-card > div[style*="align-items:flex-end"]{
+  margin-top:9px !important;
+  gap:9px !important;
+}
+#dashboard .dealplug-dashboard-card > div[style*="align-items:flex-end"] .small{
+  font-size:10px;
+}
+
+@media(max-width:700px){
+  #dashboard > .section-grid > .card:first-child{padding:12px !important;}
+  #dashboard .dashboard-recurring-summary,
+  #dashboard .dashboard-crypto-pokemon-card,
+  #dashboard .dealplug-dashboard-card{padding:12px !important;}
+  #dashboard .dashboard-recurring-summary > div[style*="grid-template-columns:1fr 1fr"] > div{padding:7px !important;}
+  #dashboard .dashboard-recurring-summary > div[style*="grid-template-columns:1fr 1fr"] > div .negative,
+  #dashboard .dashboard-recurring-summary > div[style*="grid-template-columns:1fr 1fr"] > div .positive{font-size:15px !important;}
+  #dashboard .dashboard-crypto-pokemon-card .dashboard-investment-grid > div{padding:7px !important;}
+  #dashboard .dashboard-crypto-pokemon-card .dashboard-investment-grid > div > div:last-child{font-size:15px !important;}
+  #dashboard .dealplug-dashboard-card .stat-value{font-size:18px !important;}
+}
+</style>
 </html>
 
 <style id="mobile-bottom-nav-v60">
