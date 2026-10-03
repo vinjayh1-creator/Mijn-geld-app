@@ -1101,6 +1101,101 @@ nav button.active{background:var(--soft);color:var(--primary);}
   color:var(--text) !important;
 }
 </style>
+
+<style id="compact-transaction-toggle-style">
+.compact-transaction-toggle{display:inline-flex;width:auto;max-width:100%;padding:3px;gap:3px;border-radius:10px}
+.compact-transaction-toggle button{font-size:12px;padding:7px 12px;min-height:32px;line-height:1.1}
+@media (max-width:600px){.compact-transaction-toggle button{font-size:11px;padding:6px 10px;min-height:30px}}
+</style>
+
+<style id="compact-transaction-forms">
+/* Compactere invoerblokken op Transacties, vooral op mobiel */
+#transactions #transactionForm .field label,
+#transactions #transactionForm .field input,
+#transactions #transactionForm .field select{font-size:12px}
+#transactions #transactionForm .field input,
+#transactions #transactionForm .field select{padding:8px 10px;min-height:36px}
+#transactions #transactionForm .form-grid{gap:10px}
+#transactions #transactionForm .form-actions{margin-top:10px}
+#transactions #transactionForm .btn{padding:8px 12px;font-size:12px}
+#transactions #transactionForm > div[style*="border-top"]{margin-top:12px!important;padding-top:12px!important}
+#transactions #transactionForm > div[style*="border-top"] .section-title{font-size:14px}
+#transactions #transactionForm > div[style*="border-top"] .small{font-size:11px;margin-bottom:8px!important}
+#transactions #transactionForm > div[style*="border-top"] .revolut-balance-grid{gap:8px}
+#transactions #transactionForm > div[style*="border-top"] .revolut-balance-tile{padding:8px 10px;border-radius:10px}
+#transactions #transactionForm > div[style*="border-top"] .revolut-balance-tile div{font-size:10px}
+#transactions #transactionForm > div[style*="border-top"] .revolut-balance-tile strong{font-size:15px}
+#transactions #transactionForm > div[style*="border-top"] .form-grid{gap:10px}
+@media(max-width:600px){
+  #transactions #transactionForm .form-grid{gap:8px}
+  #transactions #transactionForm .field input,
+  #transactions #transactionForm .field select{padding:7px 9px;min-height:34px}
+  #transactions #transactionForm > div[style*="border-top"] .revolut-balance-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  #transactions #transactionForm > div[style*="border-top"] .revolut-balance-tile{padding:7px 8px}
+}
+</style>
+
+<style id="compact-current-account-tiles">
+/* Compacte tegels voor huidige rekeningstanden op mobiel en desktop */
+.revolut-balance-grid .revolut-balance-tile {
+  padding: 10px 12px !important;
+  min-height: 0 !important;
+}
+.revolut-balance-grid .revolut-balance-tile .small {
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+}
+.revolut-balance-grid .revolut-balance-tile .stat-value {
+  font-size: 18px !important;
+  line-height: 1.15 !important;
+  margin-top: 3px !important;
+}
+@media (max-width: 700px) {
+  .revolut-balance-grid {
+    gap: 8px !important;
+  }
+  .revolut-balance-grid .revolut-balance-tile {
+    padding: 8px 10px !important;
+    border-radius: 12px !important;
+  }
+  .revolut-balance-grid .revolut-balance-tile .stat-value {
+    font-size: 16px !important;
+  }
+}
+<style id="dashboard-revolut-subaccount-style">
+/* Strakke subrekeningen onder Revolut op het Dashboard */
+#dashboard .revolut-balance-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin:10px 0 0;
+}
+#dashboard .revolut-balance-tile{
+  padding:9px 10px !important;
+  border:1px solid var(--border) !important;
+  border-radius:10px !important;
+  background:var(--card) !important;
+  box-shadow:none !important;
+  min-height:0 !important;
+}
+#dashboard .revolut-balance-tile div{
+  color:var(--muted) !important;
+  font-size:10px !important;
+  font-weight:500;
+}
+#dashboard .revolut-balance-tile strong{
+  color:var(--text) !important;
+  font-size:14px !important;
+  font-weight:600;
+  margin-top:3px;
+}
+@media(max-width:700px){
+  #dashboard .revolut-balance-grid{gap:6px}
+  #dashboard .revolut-balance-tile{padding:8px !important;border-radius:9px !important}
+  #dashboard .revolut-balance-tile div{font-size:9px !important}
+  #dashboard .revolut-balance-tile strong{font-size:12px !important}
+}
+</style>
+</style>
 </head>
 <body>
 <div class="app">
@@ -1499,21 +1594,22 @@ ${(()=>{
   </div>
 </div>
 <div class="card dashboard-recurring-summary">
-  <div class="section-title"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="repeat"></i>Terugkerende kosten & loon</span></div>
-  <div class="small">Je vaste maandelijkse uitgaven en je loon.</div>
+  <div class="section-title"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="repeat"></i>Vaste kosten & wekelijks loon</span></div>
+  <div class="small">Je vaste maandelijkse uitgaven en je wekelijkse loon.</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px">
     <div style="padding:11px;border:1px solid var(--border);border-radius:12px;background:var(--card)">
       <div class="small">Vaste kosten per maand</div>
       <div class="negative" style="font-size:18px;font-weight:500;margin-top:4px">${(()=>{const monthly=data.recurring.filter(r=>r.kind==="expense").reduce((s,r)=>s+Number(r.amount||0),0); return protectedEuro(monthly)})()}</div>
     </div>
     <div style="padding:11px;border:1px solid var(--border);border-radius:12px">
-      <div class="small">Loon</div>
-      <div class="positive" style="font-size:18px;font-weight:500;margin-top:4px">${(()=>{if(!data.weeklySalary?.enabled)return "Niet ingesteld"; const week=Math.min(5,Math.ceil(new Date().getDate()/7)); return protectedEuro(Number(data.weeklySalary.amount||0)*week)})()}</div>
+      <div class="small">Wekelijks loon</div>
+      <div class="positive" style="font-size:18px;font-weight:500;margin-top:4px">${(()=>{if(!data.weeklySalary?.enabled)return "Niet ingesteld"; return protectedEuro(Number(data.weeklySalary.amount||0))})()}</div>
+      <div class="small" style="margin-top:3px">Iedere woensdag</div>
     </div>
   </div>
   <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:11px">
     <div class="small" style="margin-bottom:7px">Mijn vaste kosten</div>
-    ${(()=>{const fixed=data.recurring.filter(r=>r.kind==="expense").sort((a,b)=>Number(a.day||0)-Number(b.day||0)); return fixed.length ? fixed.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)"><div style="min-width:0"><div style="font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.description||"Vaste kosten")}</div><div class="small">${esc(r.category||"Overig")} · dag ${Number(r.day||0)}</div></div><div class="negative" style="font-weight:600;white-space:nowrap">${protectedEuro(r.amount||0)}</div></div>`).join("") : `<div class="empty">Nog geen vaste kosten ingesteld.</div>`})()}
+    ${(()=>{const fixed=data.recurring.filter(r=>r.kind==="expense"); return fixed.length ? fixed.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px"><div style="min-width:0"><div style="font-size:12px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.description||"Vaste kosten")}</div><div style="font-size:12px;color:var(--muted)">${esc(r.category||"Overig")}</div></div><div class="negative" style="font-size:12px;font-weight:600;white-space:nowrap">${protectedEuro(r.amount||0)}</div></div>`).join("") : `<div class="empty">Nog geen vaste kosten ingesteld.</div>`})()}
   </div>
 </div>
 <div class="finance-insight-grid">
@@ -1667,10 +1763,10 @@ return `<tr><td>${esc(t.description)}</td><td><span class="badge">${esc(category
 function renderTransactions(){
 const ts=[...monthTransactions()].sort((a,b)=>new Date(b.date)-new Date(a.date));
 $("transactions").innerHTML=`
-<div class="topbar"><div><h1>Transacties</h1><div class="subtitle">Inkomsten en uitgaven van ${monthName()}</div></div></div>
+<div class="topbar"><div><h1>Transacties</h1><div class="subtitle">Inkomsten en overboekingen van ${monthName()}</div></div></div>
 <div class="card"><div class="section-title">Nieuwe transactie</div>
 <form id="transactionForm">
-<div class="toggle"><button type="button" data-kind="expense" class="active">Uitgave</button><button type="button" data-kind="income">Inkomst</button><button type="button" data-kind="transfer">Overboeking</button></div>
+<div class="toggle compact-transaction-toggle"><button type="button" data-kind="income" class="active">Inkomst</button><button type="button" data-kind="transfer">Overboeking</button></div>
 <div class="form-grid">
 <div class="field"><label>Omschrijving</label><input id="description" required placeholder="Bijv. Boodschappen"></div>
 <div class="field"><label>Bedrag (€)</label><input id="amount" required type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0,00"></div>
@@ -1724,7 +1820,7 @@ $("transactions").innerHTML=`
 <div class="card transactions"><div class="section-title">Transacties</div>
 ${ts.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Omschrijving</th><th>Categorie</th><th>Datum</th><th>Rekening</th><th>Bedrag</th><th></th></tr></thead><tbody>${ts.map(t=>transactionRow(t,true)).join("")}</tbody></table></div>`:`<div class="empty">Nog geen transacties.</div>`}</div>`;
 
-let kind="expense";
+let kind="income";
 document.querySelectorAll("#transactionForm [data-kind]").forEach(btn=>btn.onclick=()=>{
 kind=btn.dataset.kind;
 document.querySelectorAll("#transactionForm [data-kind]").forEach(x=>x.classList.toggle("active",x===btn));
@@ -2478,9 +2574,9 @@ $("recurring").innerHTML=`<div class="topbar"><div><h1>Terugkerend</h1><div clas
 <div class="form-actions"><label class="toggle" style="display:flex;align-items:center;gap:10px"><input id="weeklySalaryEnabled" type="checkbox" ${data.weeklySalary?.enabled?"checked":""}> Inschakelen</label><button type="button" class="btn primary" id="saveWeeklySalary">Wekelijks loon opslaan</button></div></div>
 <div class="notice"><i data-lucide="info"></i> Op de gekozen dag wordt de transactie automatisch één keer per maand toegevoegd. Een uitgave wordt alleen verwerkt als er voldoende saldo is.</div>
 <div class="card"><div class="section-title">Terugkerende transactie toevoegen</div><form id="recForm"><div class="toggle"><button type="button" data-reckind="expense" class="active">Uitgave</button><button type="button" data-reckind="income">Inkomst</button></div>
-<div class="form-grid"><div class="field"><label>Omschrijving</label><input id="recDesc" required placeholder="Bijv. Huur"></div><div class="field"><label>Bedrag (€)</label><input id="recAmount" type="number" min="0.01" step=".01" required inputmode="decimal"></div><div class="field"><label>Categorie</label><select id="recCat">${categories.map(c=>`<option>${c}</option>`).join("")}</select></div><div class="field"><label>Rekening</label><select id="recAcc">${data.accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("")}</select></div><div class="field"><label>Dag van de maand</label><input id="recDay" type="number" min="1" max="28" value="1" required></div></div>
+<div class="form-grid"><div class="field"><label>Omschrijving</label><input id="recDesc" required placeholder="Bijv. Huur"></div><div class="field"><label>Bedrag (€)</label><input id="recAmount" type="number" min="0.01" step=".01" required inputmode="decimal"></div><div class="field"><label>Categorie</label><select id="recCat">${categories.map(c=>`<option>${c}</option>`).join("")}</select></div><div class="field"><label>Rekening</label><select id="recAcc">${data.accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("")}</select></div></div>
 <div class="form-actions"><button class="btn primary"><i data-lucide="repeat"></i>Toevoegen</button></div></form></div>
-<div class="card transactions"><div class="section-title">Vaste transacties</div>${data.recurring.length?data.recurring.map((r,i)=>`<div class="account"><div class="account-left"><div class="account-icon"><i data-lucide="repeat"></i></div><div><strong>${esc(r.description)}</strong><div class="small">Elke maand op dag ${r.day} · ${esc(r.category)} · ${esc(accountById(r.accountId)?.name||"-")}</div></div></div><div style="display:flex;align-items:center;gap:12px"><span class="${r.kind==="income"?"positive":"negative"}">${r.kind==="income"?"+":"-"}${euro(r.amount)}</span><button class="icon-btn danger" data-rec-delete="${i}"><i data-lucide="trash-2"></i></button></div></div>`).join(""):`<div class="empty">Nog geen terugkerende transacties.</div>`}</div>`;
+<div class="card transactions"><div class="section-title">Vaste transacties</div>${data.recurring.length?data.recurring.map((r,i)=>`<div class="account"><div class="account-left"><div class="account-icon"><i data-lucide="repeat"></i></div><div><strong>${esc(r.description)}</strong><div class="small">Elke maand · ${esc(r.category)} · ${esc(accountById(r.accountId)?.name||"-")}</div></div></div><div style="display:flex;align-items:center;gap:12px"><span class="${r.kind==="income"?"positive":"negative"}">${r.kind==="income"?"+":"-"}${euro(r.amount)}</span><button class="icon-btn danger" data-rec-delete="${i}"><i data-lucide="trash-2"></i></button></div></div>`).join(""):`<div class="empty">Nog geen terugkerende transacties.</div>`}</div>`;
 $("saveWeeklySalary").onclick=()=>{
   const amount=Number($("weeklySalaryAmount").value);
   const accountId=$("weeklySalaryAccount").value;
@@ -2493,7 +2589,7 @@ $("saveWeeklySalary").onclick=()=>{
 };
 let kind="expense";
 document.querySelectorAll("[data-reckind]").forEach(b=>b.onclick=()=>{kind=b.dataset.reckind;document.querySelectorAll("[data-reckind]").forEach(x=>x.classList.toggle("active",x===b))});
-$("recForm").onsubmit=e=>{e.preventDefault();const amount=Number($("recAmount").value),day=Number($("recDay").value);if(!Number.isFinite(amount)||amount<=0||day<1||day>28){notify("Controleer bedrag en dag.");return}data.recurring.push({id:uid(),description:$("recDesc").value.trim(),amount,category:$("recCat").value,accountId:$("recAcc").value,day,kind});saveAndRender()};
+$("recForm").onsubmit=e=>{e.preventDefault();const amount=Number($("recAmount").value);if(!Number.isFinite(amount)||amount<=0){notify("Controleer het bedrag.");return}data.recurring.push({id:uid(),description:$("recDesc").value.trim(),amount,category:$("recCat").value,accountId:$("recAcc").value,day:1,kind});saveAndRender()};
 document.querySelectorAll("[data-rec-delete]").forEach(b=>b.onclick=()=>{if(confirm("Terugkerende transactie verwijderen?")){data.recurring.splice(Number(b.dataset.recDelete),1);saveAndRender()}});
 }
 
@@ -2696,4 +2792,87 @@ init();
 
 <style>
 @media(max-width:700px){.dashboard-recurring-summary > div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr 1fr !important;gap:8px !important}.dashboard-recurring-summary{overflow:hidden}}
+</style>
+<style id="compact-other-tabs">
+/* Zelfde compacte invoerstijl als Transacties voor de overige tabbladen */
+#crypto .card.transactions,
+#dealplug .card,
+#goals .card:first-of-type,
+#recurring .card{
+  padding:12px;
+}
+#crypto .form-grid,
+#dealplug .form-grid,
+#recurring .form-grid{
+  gap:8px;
+}
+#goals .goal-form-grid{
+  gap:8px;
+}
+#crypto .field label,
+#dealplug .field label,
+#goals .field label,
+#recurring .field label{
+  font-size:12px;
+  margin-bottom:4px;
+}
+#crypto .field input,
+#crypto .field select,
+#dealplug .field input,
+#dealplug .field select,
+#goals .field input,
+#goals .field select,
+#recurring .field input,
+#recurring .field select{
+  padding:7px 9px;
+  min-height:34px;
+  font-size:12px;
+  border-radius:9px;
+}
+#crypto .form-actions,
+#dealplug .form-actions,
+#goals .form-actions,
+#recurring .form-actions{
+  margin-top:10px;
+  gap:6px;
+}
+#crypto .btn,
+#dealplug .btn,
+#goals .btn,
+#recurring .btn{
+  padding:8px 11px;
+  font-size:12px;
+}
+#crypto .toggle,
+#dealplug .toggle,
+#recurring .toggle{
+  margin-bottom:9px;
+}
+#crypto .toggle button,
+#dealplug .toggle button,
+#recurring .toggle button{
+  padding:7px 10px;
+  font-size:12px;
+}
+#goals .goal{
+  padding:10px;
+}
+@media(max-width:700px){
+  #crypto .card.transactions,
+  #dealplug .card,
+  #goals .card:first-of-type,
+  #recurring .card{padding:11px;}
+  #crypto .form-grid,
+  #dealplug .form-grid,
+  #recurring .form-grid,
+  #goals .goal-form-grid{gap:7px;}
+  #crypto .field input,
+  #crypto .field select,
+  #dealplug .field input,
+  #dealplug .field select,
+  #goals .field input,
+  #goals .field select,
+  #recurring .field input,
+  #recurring .field select{padding:7px 8px;min-height:33px;}
+}
 </style>
